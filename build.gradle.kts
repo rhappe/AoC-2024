@@ -1,8 +1,8 @@
 plugins {
-    kotlin("jvm") version "2.0.21"
+    kotlin("jvm") version "2.1.0"
 }
 
-group = "org.example"
+group = "com.github.rhappe.aoc"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -10,6 +10,8 @@ repositories {
 }
 
 dependencies {
+    implementation("com.github.jsoberg:Kotlin-AoC-API:1.0")
+
     testImplementation(kotlin("test"))
 }
 
