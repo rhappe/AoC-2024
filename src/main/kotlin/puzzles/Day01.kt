@@ -1,21 +1,44 @@
 package puzzles
 
-private data class LocationsData(
-    val list1: List<Int>,
-    val list2: List<Int>,
-)
+import api.API_LINE_ITEM_SEPARATOR
+import api.readInput
+import kotlin.math.abs
 
 fun main() {
-    val locationData = LocationsData(
-        list1 = listOf(3, 4, 2, 1, 3, 3),
-        list2 = listOf(4, 3, 5, 3, 9, 3),
+    val input = readInput(day = 1).getOrThrow()
+    val inputList1 = mutableListOf<Int>()
+    val inputList2 = mutableListOf<Int>()
+
+    input.forEach { line ->
+        line.split(API_LINE_ITEM_SEPARATOR).also {
+            inputList1.add(it.first().toInt())
+            inputList2.add(it.last().toInt())
+        }
+    }
+
+    val part1Answer = part1(
+        inputList1 = inputList1,
+        inputList2 = inputList2,
     )
+    println("Part 1: $part1Answer")
 
-    val sortedList1 = locationData.list1.sorted()
-    val sortedList2 = locationData.list2.sorted()
+    val part2Answer = part2(
+        inputList1 = inputList1,
+        inputList2 = inputList2,
+    )
+    println("Part 2: $part2Answer")
+}
 
-    val differences = sortedList1.zip(sortedList2).map { it.second - it.first }
-    val sum = differences.sum()
 
-    println("Sum: $sum")
+private fun part1(inputList1: List<Int>, inputList2: List<Int>): Int {
+    return inputList1.sorted().zip(inputList2.sorted()).sumOf { abs(it.second - it.first) }
+}
+
+private fun part2(inputList1: List<Int>, inputList2: List<Int>): Int {
+    var total = 0
+    inputList1.forEach { line ->
+        val count = inputList2.count { it == line }
+        total += count * line
+    }
+    return total
 }
