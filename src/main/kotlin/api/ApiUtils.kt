@@ -11,11 +11,14 @@ fun AdventOfCodeInputApi(cacheDir: String = "input") = AdventOfCodeInputApi(
     cachingStrategy = AdventOfCodeInputApi.CachingStrategy.LocalTextFile(cacheDir),
 )
 
-fun readInput(day: Int): Result<List<String>> = AdventOfCodeInputApi().blockingReadInput(
-    year = 2024,
-    day = day,
-    sessionToken = readSessionToken(),
-)
+fun readInput(day: Int): List<String> {
+    val result = AdventOfCodeInputApi().blockingReadInput(
+        year = 2024,
+        day = day,
+        sessionToken = readSessionToken(),
+    )
+    return result.getOrThrow()
+}
 
 private fun readSessionToken(): String {
     val secretTokenFile = Path(path = "session-token.secret")

@@ -5,7 +5,7 @@ import api.readInput
 import kotlin.math.abs
 
 fun main() {
-    val input = readInput(day = 1).getOrThrow()
+    val input = readInput(day = 1)
     val inputList1 = mutableListOf<Int>()
     val inputList2 = mutableListOf<Int>()
 
