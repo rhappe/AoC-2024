@@ -35,10 +35,5 @@ private fun part1(inputList1: List<Int>, inputList2: List<Int>): Int {
 }
 
 private fun part2(inputList1: List<Int>, inputList2: List<Int>): Int {
-    var total = 0
-    inputList1.forEach { line ->
-        val count = inputList2.count { it == line }
-        total += count * line
-    }
-    return total
+    return inputList1.sumOf { line -> inputList2.count { it == line } * line }
 }
