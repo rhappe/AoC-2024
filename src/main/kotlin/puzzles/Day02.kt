@@ -6,7 +6,6 @@ import kotlin.math.absoluteValue
 fun main() {
     val input = readInput(day = 2)
     val reports = Day02.parseInput(input)
-    println(reports)
     println(Day02.Part01.calculateSafeReportCount(reports))
 }
 
