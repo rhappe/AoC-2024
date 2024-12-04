@@ -81,7 +81,8 @@ private object Day04 {
             val limbLength = word.length / 2
             for (row in limbLength until input[0].length - limbLength) {
                 for (col in limbLength until input.size - limbLength) {
-                    val left = buildString {
+                    // backward as in this string makes the "backward slash" shape of the X
+                    val backward = buildString {
                         for (index in -limbLength until 0) {
                             append(input[row + index][col + index])
                         }
@@ -90,7 +91,8 @@ private object Day04 {
                             append(input[row + limbLength][col + limbLength])
                         }
                     }
-                    val right = buildString {
+                    // forward as in this string makes the "forward slash" shape of the X
+                    val forward = buildString {
                         for (index in -limbLength until 0) {
                             append(input[row - index][col + index])
                         }
@@ -100,7 +102,7 @@ private object Day04 {
                         }
                     }
 
-                    if ((left == word || left == word.reversed()) && (right == word || right == word.reversed())) {
+                    if ((backward == word || backward == word.reversed()) && (forward == word || forward == word.reversed())) {
                         count++
                     }
                 }
