@@ -18,17 +18,20 @@ private object Day04 {
                 addAll(getDiagonalWordsLeftToRight(input))
                 addAll(getDiagonalWordsRightToLeft(input))
             }
-            return allWords.sumOf { word.toRegex().findAll(it).count() }
+
+            val count = allWords.sumOf { word.toRegex().findAll(it).count() }
+            val reversedCount = allWords.sumOf { word.reversed().toRegex().findAll(it).count() }
+            return count + reversedCount
         }
     }
 
     private fun getHorizontalWords(input: List<String>): List<String> {
-        return input + input.map { it.reversed() }
+        return input
     }
 
     private fun getVerticalWords(input: List<String>): List<String> {
         val rotated = rotate(input)
-        return rotated + rotated.map { it.reversed() }
+        return rotated
     }
 
     private fun getDiagonalWordsLeftToRight(input: List<String>): List<String> {
@@ -45,7 +48,7 @@ private object Day04 {
             }
         }
 
-        return strings + strings.map { it.reversed() }
+        return strings
     }
 
     private fun getDiagonalWordsRightToLeft(input: List<String>): List<String> {
