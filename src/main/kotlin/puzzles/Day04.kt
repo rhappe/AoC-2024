@@ -38,7 +38,7 @@ private object Day04 {
 
         private fun getDiagonalWordsLeftToRight(input: List<String>): List<String> {
             val strings = buildList {
-                for (row in 0..(input.size + input[0].length - 2)) {
+                for (row in 0..(input.lastIndex + input[0].lastIndex)) {
                     val word = buildString {
                         for (column in 0..row) {
                             if (row - column in input.indices && column in input[row - column].indices) {
