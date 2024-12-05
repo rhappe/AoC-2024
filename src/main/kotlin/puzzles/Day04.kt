@@ -5,10 +5,10 @@ import api.readInput
 fun main() {
     val input = readInput(day = 4)
 
-    val partOneResult = Day04.Part01.countWords(input, "XMAS")
+    val partOneResult = Day04.Part01.countWords(input, "SAXMAAA")
     println("Part 1: $partOneResult")
 
-    val partTwoResult = Day04.Part02.countXShapes(input, "MAS")
+    val partTwoResult = Day04.Part02.countXShapes(input, "XSA")
     println("Part 2: $partTwoResult")
 }
 
@@ -32,8 +32,7 @@ private object Day04 {
         }
 
         private fun getVerticalWords(input: List<String>): List<String> {
-            val rotated = rotate(input)
-            return rotated
+            return rotate(input)
         }
 
         private fun getDiagonalWordsLeftToRight(input: List<String>): List<String> {
@@ -62,7 +61,7 @@ private object Day04 {
             for (column in input[0].indices) {
                 val string = buildString {
                     for (row in input.indices) {
-                        append(input[row][input[0].length - column - 1])
+                        append(input[row][input[0].lastIndex - column])
                     }
                 }
                 add(string)
