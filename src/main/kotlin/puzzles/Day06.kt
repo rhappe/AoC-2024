@@ -1,16 +1,23 @@
 package puzzles
 
 import api.readInput
-import kotlin.jvm.Throws
+import kotlinx.coroutines.*
+import utils.formatSeconds
+import utils.printAnswer
+import java.util.concurrent.atomic.AtomicInteger
+import kotlin.time.measureTimedValue
 
-fun main() {
+fun main() = runBlocking {
     val input = readInput(day = 6)
 
-    val partOneAnswer = Day06.Part01.getDistinctCoordinatesCount(input)
-    println("Part 1: $partOneAnswer")
+    val partOneAnswer = measureTimedValue { Day06.Part01.getDistinctCoordinatesCount(input) }
+    partOneAnswer.printAnswer(part = 1)
 
-    val partTwoAnswer = Day06.Part02.getInfiniteLoopCount(input)
-    println("Part 2: $partTwoAnswer")
+    val partTwoAnswer = measureTimedValue { Day06.Part02.getInfiniteLoopCount(input) }
+    partTwoAnswer.printAnswer(part = 2)
+
+    val totalTime = partOneAnswer.duration + partTwoAnswer.duration
+    println("Total elapsed time: ${totalTime.formatSeconds()}")
 }
 
 private object Day06 {
@@ -25,27 +32,32 @@ private object Day06 {
 
     object Part02 {
         fun getInfiniteLoopCount(input: List<String>): Int {
-            var count = 0
-            val grid = input.map { it.toMutableList() }.toMutableList()
-            for (row in grid.indices) {
-                for (col in grid.indices) {
-                    if (grid[row][col] == OBSTACLE || grid[row][col] in FacingDirection.characters) {
-                        continue
-                    }
-                    val original = grid[row][col]
-                    grid[row][col] = OBSTACLE
+            val count = AtomicInteger()
+            val grid = input.map { it.toList() }
+            runBlocking(Dispatchers.Default) {
+                for (row in grid.indices) {
+                    for (col in grid.indices) {
+                        if (grid[row][col] == OBSTACLE || grid[row][col] in FacingDirection.characters) {
+                            continue
+                        }
 
-                    try {
-                        getVisitedPositionVectors(grid)
-                    } catch (error: InfiniteLoopException) {
-                        count++
+                        launch {
+                            try {
+                                getVisitedPositionVectors(grid, Coordinate(row, col))
+                            } catch (error: InfiniteLoopException) {
+                                count.incrementAndGet()
+                            }
+                        }
                     }
-
-                    // revert back to the original value.
-                    grid[row][col] = original
                 }
             }
-            return count
+            return count.get()
+        }
+    }
+
+    private fun CoroutineScope.launchGridCalculation(grid: List<List<Char>>, block: (List<List<Char>>) -> Unit) {
+        launch {
+            block(grid)
         }
     }
 
@@ -62,7 +74,10 @@ private object Day06 {
      * continue to do so.
      */
     @Throws(InfiniteLoopException::class)
-    private fun getVisitedPositionVectors(grid: List<List<Char>>): Set<Vector> {
+    private fun getVisitedPositionVectors(
+        grid: List<List<Char>>,
+        vararg additionalObstacles: Coordinate,
+    ): Set<Vector> {
         var characterPosition = getInitialCharacterPosition(grid)
         var finished = false
         return buildSet {
@@ -74,7 +89,7 @@ private object Day06 {
                 val nextCoordinate = characterPosition.coordinate + characterPosition.direction
                 if (nextCoordinate !in grid) {
                     finished = true
-                } else if (grid[nextCoordinate] == OBSTACLE) {
+                } else if (grid[nextCoordinate] == OBSTACLE || nextCoordinate in additionalObstacles) {
                     characterPosition = characterPosition.rotated()
                 } else {
                     characterPosition = characterPosition.copy(coordinate = nextCoordinate)
