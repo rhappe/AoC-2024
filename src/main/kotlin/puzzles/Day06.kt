@@ -14,30 +14,6 @@ fun main() {
 }
 
 private object Day06 {
-    private const val OBSTACLE = '#'
-
-    private enum class FacingDirection(val character: Char) {
-        NORTH('^'),
-        EAST('>'),
-        SOUTH('v'),
-        WEST('<'),
-        ;
-
-        fun rotateClockwise(): FacingDirection = when (this) {
-            NORTH -> EAST
-            EAST -> SOUTH
-            SOUTH -> WEST
-            WEST -> NORTH
-        }
-
-        companion object {
-            val characters = entries.map { it.character }.toSet()
-            fun fromCharacter(character: Char) = entries.first { it.character == character }
-        }
-    }
-
-    private class InfiniteLoopException : Error("Infinite loop detected!")
-
     object Part01 {
         fun getDistinctCoordinatesCount(input: List<String>): Int {
             val vectors = getVisitedPositionVectors(
@@ -135,6 +111,28 @@ private object Day06 {
         return coordinate.row in indices && coordinate.col in this[0].indices
     }
 
+    private const val OBSTACLE = '#'
+
+    private enum class FacingDirection(val character: Char) {
+        NORTH('^'),
+        EAST('>'),
+        SOUTH('v'),
+        WEST('<'),
+        ;
+
+        fun rotateClockwise(): FacingDirection = when (this) {
+            NORTH -> EAST
+            EAST -> SOUTH
+            SOUTH -> WEST
+            WEST -> NORTH
+        }
+
+        companion object {
+            val characters = entries.map { it.character }.toSet()
+            fun fromCharacter(character: Char) = entries.first { it.character == character }
+        }
+    }
+
     private data class Vector(
         val coordinate: Coordinate,
         val direction: FacingDirection,
@@ -155,4 +153,6 @@ private object Day06 {
             FacingDirection.WEST -> copy(col = col - 1)
         }
     }
+
+    private class InfiniteLoopException : Error("Infinite loop detected!")
 }
