@@ -133,19 +133,13 @@ private object Day06 {
         }
     }
 
-    private data class Vector(
-        val coordinate: Coordinate,
-        val direction: FacingDirection,
-    ) {
+    private data class Vector(val coordinate: Coordinate, val direction: FacingDirection) {
         fun rotated(): Vector {
             return copy(direction = direction.rotateClockwise())
         }
     }
 
-    private data class Coordinate(
-        val row: Int,
-        val col: Int,
-    ) {
+    private data class Coordinate(val row: Int, val col: Int) {
         operator fun plus(facingDirection: FacingDirection): Coordinate = when (facingDirection) {
             FacingDirection.NORTH -> copy(row = row - 1)
             FacingDirection.EAST -> copy(col = col + 1)
