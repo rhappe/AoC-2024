@@ -1,6 +1,7 @@
 package puzzles
 
 import api.readInput
+import kotlin.jvm.Throws
 
 fun main() {
     val input = readInput(day = 6)
@@ -56,7 +57,7 @@ private object Day06 {
                         continue
                     }
                     val original = grid[row][col]
-                    grid[row][col] = '#'
+                    grid[row][col] = OBSTACLE
 
                     try {
                         getVisitedPositionVectors(grid)
@@ -72,6 +73,19 @@ private object Day06 {
         }
     }
 
+    /**
+     * Gets the visited position vectors by moving the existing character around the grid and recording the coordinates
+     * visited along with the facing direction (i.e. coordinates + direction = vector).
+     *
+     * Infinite loops are detected if we attempt to record the same position vector twice. In this case, an
+     * [InfiniteLoopException] will be thrown.
+     *
+     * The reason we record vectors instead of just the visited coordinate is mainly for infinite loop detection. The
+     * character can visit the same coordinate twice, but if they visit the same coordinate with the same facing
+     * direction multiple times, then they are just continuing along a path that they already followed and will forever
+     * continue to do so.
+     */
+    @Throws(InfiniteLoopException::class)
     private fun getVisitedPositionVectors(grid: List<List<Char>>): Set<Vector> {
         var characterPosition = getInitialCharacterPosition(grid)
         var finished = false
@@ -82,7 +96,7 @@ private object Day06 {
                 }
                 add(characterPosition)
                 val nextCoordinate = characterPosition.coordinate + characterPosition.direction
-                if (nextCoordinate.row !in grid.indices || nextCoordinate.col !in grid[0].indices) {
+                if (nextCoordinate !in grid) {
                     finished = true
                 } else if (grid[nextCoordinate] == OBSTACLE) {
                     characterPosition = characterPosition.rotated()
@@ -115,6 +129,10 @@ private object Day06 {
 
     private operator fun <T> List<List<T>>.get(coordinate: Coordinate): T {
         return this[coordinate.row][coordinate.col]
+    }
+
+    private operator fun List<List<Any>>.contains(coordinate: Coordinate): Boolean {
+        return coordinate.row in indices && coordinate.col in this[0].indices
     }
 
     private data class Vector(
