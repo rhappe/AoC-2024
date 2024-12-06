@@ -55,12 +55,6 @@ private object Day06 {
         }
     }
 
-    private fun CoroutineScope.launchGridCalculation(grid: List<List<Char>>, block: (List<List<Char>>) -> Unit) {
-        launch {
-            block(grid)
-        }
-    }
-
     /**
      * Gets the visited position vectors by moving the existing character around the grid and recording the coordinates
      * visited along with the facing direction (i.e. coordinates + direction = vector).
