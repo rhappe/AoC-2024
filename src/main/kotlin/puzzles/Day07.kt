@@ -1,11 +1,9 @@
 package puzzles
 
 import api.readInput
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
+import com.soberg.aoc.utlities.extensions.asyncSumOfBlocking
 import kotlinx.coroutines.runBlocking
 import utils.printAnswer
-import java.util.concurrent.atomic.AtomicLong
 import kotlin.math.pow
 import kotlin.time.measureTimedValue
 
@@ -21,10 +19,7 @@ fun main() = runBlocking {
 
 private object Day07 {
     enum class Operator : (Long, Long) -> Long {
-        ADD,
-        MULTIPLY,
-        CONCAT,
-        ;
+        ADD, MULTIPLY, CONCAT, ;
 
         override fun invoke(p1: Long, p2: Long): Long = when (this) {
             ADD -> p1 + p2
@@ -33,51 +28,38 @@ private object Day07 {
         }
     }
 
+
     object Part01 {
         fun getCorrectResultSum(input: List<String>): Long {
             val equations = parseEquations(input)
-            val sum = AtomicLong()
-            runBlocking {
-                equations.forEach {
-                    launch {
-                        if (checkCalculation(it, Operator.ADD, Operator.MULTIPLY)) {
-                            sum.addAndGet(it.result)
-                        }
-                    }
-                }
+            return equations.asyncSumOfBlocking { equation ->
+                val result = equation.checkCalculation(Operator.ADD, Operator.MULTIPLY)
+                if (result) equation.result else 0
             }
-            return sum.get()
         }
     }
 
     object Part02 {
         fun getCorrectResultSum(input: List<String>): Long {
             val equations = parseEquations(input)
-            val sum = AtomicLong()
-            runBlocking(Dispatchers.Default) {
-                equations.forEach {
-                    launch {
-                        if (checkCalculation(it, Operator.ADD, Operator.MULTIPLY, Operator.CONCAT)) {
-                            sum.addAndGet(it.result)
-                        }
-                    }
-                }
+            return equations.asyncSumOfBlocking { equation ->
+                val result = equation.checkCalculation(Operator.ADD, Operator.MULTIPLY, Operator.CONCAT)
+                if (result) equation.result else 0
             }
-            return sum.get()
         }
     }
 
-    private fun checkCalculation(equation: Equation, vararg supportedOperators: Operator): Boolean {
-        val numOperators = equation.parts.size - 1
+    private fun Equation.checkCalculation(vararg supportedOperators: Operator): Boolean {
+        val numOperators = parts.size - 1
         val combinations = (supportedOperators.size.toDouble().pow(numOperators) - 1).toInt()
         for (attempt in 0..combinations) {
             val operators = getOperatorsForAttempt(attempt, numOperators, supportedOperators.toList())
-            val partsQueue = ArrayDeque(equation.parts)
+            val partsQueue = ArrayDeque(parts)
             var answer = partsQueue.removeFirst().toLong()
             operators.forEach {
                 answer = it.invoke(answer, partsQueue.removeFirst().toLong())
             }
-            if (answer == equation.result) {
+            if (answer == result) {
                 return true
             }
         }
