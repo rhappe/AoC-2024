@@ -72,24 +72,18 @@ private object Day08 {
     ): List<Point> = buildList {
         var distanceCounter = 0
         val delta = nodes.second.position - nodes.first.position
-        var checkPosition = nodes.first.position
-        while (checkPosition in grid && distanceCounter < distance) {
-            add(checkPosition)
-            if (checkPosition != nodes.first.position && checkPosition != nodes.second.position) {
-                distanceCounter++
-            }
-            checkPosition += delta
-        }
+        addAll(
+            generateSequence(nodes.first.position) { it + delta }
+                .takeWhile { it in grid && distanceCounter < distance }
+                .onEach { if (it != nodes.first.position && it != nodes.second.position) distanceCounter++ }
+        )
 
         distanceCounter = 0
-        checkPosition = nodes.first.position - delta
-        while (checkPosition in grid && distanceCounter < distance) {
-            add(checkPosition)
-            if (checkPosition != nodes.first.position && checkPosition != nodes.second.position) {
-                distanceCounter++
-            }
-            checkPosition -= delta
-        }
+        addAll(
+            generateSequence(nodes.first.position - delta) { it - delta }
+                .takeWhile { it in grid && distanceCounter < distance }
+                .onEach { if (it != nodes.first.position && it != nodes.second.position) distanceCounter++ }
+        )
     }
 
     private fun parseGrid(input: List<String>): Grid = Grid(
