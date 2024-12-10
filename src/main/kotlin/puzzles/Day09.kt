@@ -51,7 +51,6 @@ private object Day09 {
         private fun compact(chunks: List<DataChunk>): List<DataChunk> {
             val newChunks = chunks.toMutableList()
             val reversedFiles = chunks.filterIsInstance<DataChunk.File>().reversed()
-            var indexAdjustment = 0
             reversedFiles.forEach { file ->
                 val firstFreeIndex = newChunks.indexOfFirst { it is DataChunk.FreeSpace && file.size <= it.size }
                 val dataIndex = newChunks.indexOfLast { it == file }
@@ -62,7 +61,6 @@ private object Day09 {
                     val remainingSpace = freeChunk.size - file.size
                     if (remainingSpace > 0) {
                         newChunks.add(firstFreeIndex + 1, DataChunk.FreeSpace(remainingSpace))
-                        indexAdjustment++
                     }
                 }
             }
