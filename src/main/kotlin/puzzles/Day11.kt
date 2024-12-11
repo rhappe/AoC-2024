@@ -17,23 +17,21 @@ fun main() {
 private object Day11 {
     object Part01 {
         fun getResultingStonesCount(input: String): Long {
-            val pluto = Pluto(parseStoneValues(input))
+            val pluto = Pluto(input)
             return pluto.countStonesAfterBlinks(times = 25)
         }
     }
 
     object Part02 {
         fun getResultingStonesCount(input: String): Long {
-            val pluto = Pluto(parseStoneValues(input))
+            val pluto = Pluto(input)
             return pluto.countStonesAfterBlinks(times = 75)
         }
     }
 
-    private fun parseStoneValues(input: String): List<Long> {
-        return input.split(" ").map { it.toLong() }
-    }
-
     private class Pluto(private val initialStones: List<Long>) {
+        constructor(initialStones: String) : this(initialStones.split(" ").map { it.toLong() })
+
         // keep track of the stone value paired with the number of starting blinks
         // mapped to the number of stones that resulted after said blinks have occurred.
         private val trackedStones = mutableMapOf<Pair<Long, Int>, Long>()
@@ -44,11 +42,8 @@ private object Day11 {
 
         private fun countStonesAfterBlinks(stoneValue: Long, remaining: Int): Long {
             val trackedValue = trackedStones[stoneValue to remaining]
-            if (trackedValue != null) {
-                return trackedValue
-            }
-
             val stonesCount = when {
+                trackedValue != null -> trackedValue
                 remaining == 0 -> 1L
                 stoneValue == 0L -> countStonesAfterBlinks(
                     stoneValue = 1L,
