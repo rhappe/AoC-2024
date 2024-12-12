@@ -94,6 +94,8 @@ private object Day12 {
         val type: Char,
         val plots: List<Plot>,
     ) {
+        operator fun contains(position: Coordinate) = position in plots.map { it.position }
+
         val costByFenceCount: Int = plots.size * plots.sumOf { it.fences.count() }
 
         val costBySide: Int by lazy {
@@ -167,12 +169,12 @@ private object Day12 {
             return@lazy plots.size * numCorners
         }
 
-        private fun isCorner(plot: Plot, direction1: Direction, direction2: Direction): Boolean {
-            val check1 = plot.position + direction1 + direction2
-            val check2 = plot.position + direction1
-            val check3 = plot.position + direction2
+        private fun isCorner(plot: Plot, lateral: Direction, longitudinal: Direction): Boolean {
+            val diagonalCheck = plot.position + lateral + longitudinal
+            val lateralCheck = plot.position + lateral
+            val longitudinalCheck = plot.position + longitudinal
 
-            val results = listOf(check1, check2, check3).map { check -> check in plots.map { it.position } }
+            val results = listOf(diagonalCheck, lateralCheck, longitudinalCheck).map { it in this }
 
             return when (results) {
                 // if none of the checks are in the region, then this is a corner.
