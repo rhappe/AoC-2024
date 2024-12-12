@@ -11,10 +11,10 @@ fun main() = runBlocking {
     val input = readInput(day = 7)
 
     val partOneAnswer = measureTimedValue { Day07.Part01.getCorrectResultSum(input) }
-    partOneAnswer.printAnswer(part = 1)
+    partOneAnswer.printAnswer(label = "Part 1")
 
     val partTwoAnswer = measureTimedValue { Day07.Part02.getCorrectResultSum(input) }
-    partTwoAnswer.printAnswer(part = 2)
+    partTwoAnswer.printAnswer(label = "Part 2")
 }
 
 private object Day07 {

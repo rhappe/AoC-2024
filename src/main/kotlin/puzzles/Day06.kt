@@ -11,10 +11,10 @@ fun main() = runBlocking {
     val input = readInput(day = 6)
 
     val partOneAnswer = measureTimedValue { Day06.Part01.getDistinctCoordinatesCount(input) }
-    partOneAnswer.printAnswer(part = 1)
+    partOneAnswer.printAnswer(label = "Part 1")
 
     val partTwoAnswer = measureTimedValue { Day06.Part02.getInfiniteLoopCount(input) }
-    partTwoAnswer.printAnswer(part = 2)
+    partTwoAnswer.printAnswer(label = "Part 2")
 
     val totalTime = partOneAnswer.duration + partTwoAnswer.duration
     println("Total elapsed time: ${totalTime.formatSeconds()}")

@@ -5,20 +5,16 @@ import model.Coordinate
 import model.Direction
 import model.Grid
 import utils.mapValues
+import utils.runTimedMeasurement
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
 fun main() {
     val input = readInput(day = 12)
 
-    val partOneAnswer = measureTimedValue { Day12.Part01.calculateFenceCost(input) }
-    println("Part 1: ${partOneAnswer.value}; Duration: ${partOneAnswer.duration.toString(DurationUnit.SECONDS, 4)}")
-
-    val partTwoAnswer = measureTimedValue { Day12.Part02.calculateFenceCost(input) }
-    println("Part 2: ${partTwoAnswer.value}; Duration: ${partTwoAnswer.duration.toString(DurationUnit.SECONDS, 4)}")
-
-    val partTwoCorners = measureTimedValue { Day12.Part02ButUsingCorners.calculateFenceCost(input) }
-    println("Part 2: ${partTwoCorners.value}; Duration: ${partTwoCorners.duration.toString(DurationUnit.SECONDS, 4)}")
+    runTimedMeasurement("Part 1") { Day12.Part01.calculateFenceCost(input) }
+    runTimedMeasurement("Part 2") { Day12.Part02.calculateFenceCost(input) }
+    runTimedMeasurement("Part 2 w/ corners") { Day12.Part02ButUsingCorners.calculateFenceCost(input) }
 }
 
 private object Day12 {
@@ -46,51 +42,41 @@ private object Day12 {
         }
     }
 
-
-    private class GardenBuilder(private val grid: Grid<Char>) {
-        private val traversedPositions = mutableSetOf<Coordinate>()
-
-        fun buildGarden(): Garden {
-            val regions = buildList {
-                grid.forEachIndexed { position, type ->
-                    val plots = buildRegionPlots(type, position)
-                    if (plots.isNotEmpty()) {
-                        this += Region(
-                            type = type,
-                            plots = plots,
-                        )
-                    }
-                }
-            }
-            return Garden(regions)
+    private data class Plot(
+        val position: Coordinate,
+        val fences: List<Direction>,
+    ) {
+        fun getCornerCount(region: Region): Int {
+            val cornerChecks = listOf(
+                isCorner(region, Direction.North, Direction.East),
+                isCorner(region, Direction.South, Direction.East),
+                isCorner(region, Direction.South, Direction.West),
+                isCorner(region, Direction.North, Direction.West),
+            )
+            return cornerChecks.count { it }
         }
 
-        private fun buildRegionPlots(type: Char, position: Coordinate): List<Plot> {
-            if (position in traversedPositions || position !in grid || grid[position] != type) {
-                return emptyList()
+        private fun isCorner(region: Region, lateral: Direction, longitudinal: Direction): Boolean {
+            val diagonalCheck = position + lateral + longitudinal
+            val lateralCheck = position + lateral
+            val longitudinalCheck = position + longitudinal
+
+            val results = listOf(diagonalCheck, lateralCheck, longitudinalCheck).map { it in region }
+
+            return when (results) {
+                // if none of the checks are in the region, then this is a corner.
+                listOf(false, false, false) -> true
+                // if only the "unidirectional" checks are in the region, this is a corner.
+                listOf(false, true, true) -> true
+                // if only the "diagonal" cell is in the region, this is a corner.
+                listOf(true, false, false) -> true
+                // otherwise, this is not a corner.
+                else -> false
             }
-
-            traversedPositions += position
-
-            val currentPlot = Plot(
-                position = position,
-                fences = Direction.entries.filter { position + it !in grid || grid[position + it] != type },
-            )
-
-            val adjacent = Direction.entries
-                .filter { it !in currentPlot.fences }
-                .flatMap { buildRegionPlots(type, position + it) }
-
-            return adjacent + currentPlot
         }
     }
 
-    data class Plot(
-        val position: Coordinate,
-        val fences: List<Direction>,
-    )
-
-    data class Region(
+    private data class Region(
         val type: Char,
         val plots: List<Plot>,
     ) {
@@ -156,42 +142,11 @@ private object Day12 {
         }
 
         val costBySideUsingCorners: Int by lazy {
-            val biDirectionals = listOf(
-                Direction.North to Direction.East,
-                Direction.South to Direction.East,
-                Direction.South to Direction.West,
-                Direction.North to Direction.West,
-            )
-
-            val numCorners = plots.sumOf { plot ->
-                biDirectionals.count { isCorner(plot, it.first, it.second) }
-            }
-            return@lazy plots.size * numCorners
-        }
-
-        private fun isCorner(plot: Plot, lateral: Direction, longitudinal: Direction): Boolean {
-            val diagonalCheck = plot.position + lateral + longitudinal
-            val lateralCheck = plot.position + lateral
-            val longitudinalCheck = plot.position + longitudinal
-
-            val results = listOf(diagonalCheck, lateralCheck, longitudinalCheck).map { it in this }
-
-            return when (results) {
-                // if none of the checks are in the region, then this is a corner.
-                listOf(false, false, false) -> true
-                // if only the "unidirectional" checks are in the region, this is a corner.
-                listOf(false, true, true) -> true
-                // if only the "diagonal" cell is in the region, this is a corner.
-                listOf(true, false, false) -> true
-                // otherwise, this is not a corner.
-                else -> false
-            }
+            plots.size * plots.sumOf { it.getCornerCount(this) }
         }
     }
 
-    data class Garden(
-        val regions: List<Region>,
-    ) {
+    private data class Garden(val regions: List<Region>) {
         val costByFenceCount: Int = regions.sumOf { it.costByFenceCount }
 
         val costBySide: Int by lazy {
@@ -207,5 +162,42 @@ private object Day12 {
         )
     }
 
-    fun Garden(grid: Grid<Char>) = GardenBuilder(grid).buildGarden()
+    private fun Garden(grid: Grid<Char>) = GardenBuilder(grid).buildGarden()
+
+    private class GardenBuilder(private val grid: Grid<Char>) {
+        private val traversedPositions = mutableSetOf<Coordinate>()
+
+        fun buildGarden(): Garden = Garden(
+            regions = buildList {
+                grid.forEachIndexed { position, type ->
+                    val plots = buildRegionPlots(type, position)
+                    if (plots.isNotEmpty()) {
+                        this += Region(
+                            type = type,
+                            plots = plots,
+                        )
+                    }
+                }
+            },
+        )
+
+        private fun buildRegionPlots(type: Char, position: Coordinate): List<Plot> {
+            if (position in traversedPositions || position !in grid || grid[position] != type) {
+                return emptyList()
+            }
+
+            traversedPositions += position
+
+            val currentPlot = Plot(
+                position = position,
+                fences = Direction.entries.filter { position + it !in grid || grid[position + it] != type },
+            )
+
+            val adjacent = Direction.entries
+                .filter { it !in currentPlot.fences }
+                .flatMap { buildRegionPlots(type, position + it) }
+
+            return adjacent + currentPlot
+        }
+    }
 }
