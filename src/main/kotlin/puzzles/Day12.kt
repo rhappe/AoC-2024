@@ -123,6 +123,13 @@ private object Day12 {
                     .map { it.sorted() }
             }
 
+            // calculate the distance between each of the plots for the given row or column
+            // if distance = 1, then they are right next to each other. If distance > 1, then
+            // they are separated by a plot of a different type of plant.
+            // For example: AAABAACCA will have differences of 1, 1, 2, 1, 3
+            // We will count a distinct "side" every time there is a distance > 1 (a "gap"), plus 1.
+            // So the above example has 2 "gaps", plus a constant 1 = 3 distinct "sides."
+            // Another example: AAAAAAAA has 0 "gaps", plus a constant 1 = 1 distinct "side."
             val differences = groups.map { group ->
                 val differences = buildList {
                     for (index in group.lastIndex downTo 1) {
