@@ -179,7 +179,9 @@ private object Day12 {
                 listOf(false, false, false) -> true
                 // if only the "unidirectional" checks are in the region, this is a corner.
                 listOf(false, true, true) -> true
+                // if only the "diagonal" cell is in the region, this is a corner.
                 listOf(true, false, false) -> true
+                // otherwise, this is not a corner.
                 else -> false
             }
         }
