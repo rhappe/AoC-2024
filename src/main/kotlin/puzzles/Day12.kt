@@ -11,19 +11,19 @@ import kotlin.time.measureTimedValue
 fun main() {
     val input = readInput(day = 12)
 
-    val partOneAnswer = measureTimedValue { Day12.Part01.foo(input) }
+    val partOneAnswer = measureTimedValue { Day12.Part01.calculateFenceCost(input) }
     println("Part 1: ${partOneAnswer.value}; Duration: ${partOneAnswer.duration.toString(DurationUnit.SECONDS, 4)}")
 
-    val partTwoAnswer = measureTimedValue { Day12.Part02.foo(input) }
+    val partTwoAnswer = measureTimedValue { Day12.Part02.calculateFenceCost(input) }
     println("Part 2: ${partTwoAnswer.value}; Duration: ${partTwoAnswer.duration.toString(DurationUnit.SECONDS, 4)}")
 
-    val partTwoCorners = measureTimedValue { Day12.Part02ButUsingCorners.foo(input) }
+    val partTwoCorners = measureTimedValue { Day12.Part02ButUsingCorners.calculateFenceCost(input) }
     println("Part 2: ${partTwoCorners.value}; Duration: ${partTwoCorners.duration.toString(DurationUnit.SECONDS, 4)}")
 }
 
 private object Day12 {
     object Part01 {
-        fun foo(input: List<String>): Int {
+        fun calculateFenceCost(input: List<String>): Int {
             val grid = Grid(input)
             val garden = Garden(grid)
             return garden.costByFenceCount
@@ -31,7 +31,7 @@ private object Day12 {
     }
 
     object Part02 {
-        fun foo(input: List<String>): Int {
+        fun calculateFenceCost(input: List<String>): Int {
             val grid = Grid(input)
             val garden = Garden(grid)
             return garden.costBySide
@@ -39,7 +39,7 @@ private object Day12 {
     }
 
     object Part02ButUsingCorners {
-        fun foo(input: List<String>): Int {
+        fun calculateFenceCost(input: List<String>): Int {
             val grid = Grid(input)
             val garden = Garden(grid)
             return garden.costBySideUsingCorners
