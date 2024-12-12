@@ -8,15 +8,6 @@ import utils.mapValues
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
-val fakeInput = listOf(
-    "AAAAAA",
-    "AAABBA",
-    "AAABBA",
-    "ABBAAA",
-    "ABBAAA",
-    "AAAAAA",
-)
-
 fun main() {
     val input = readInput(day = 12)
 
@@ -26,15 +17,8 @@ fun main() {
     val partTwoAnswer = measureTimedValue { Day12.Part02.foo(input) }
     println("Part 2: ${partTwoAnswer.value}; Duration: ${partTwoAnswer.duration.toString(DurationUnit.SECONDS, 4)}")
 
-    val partTwoAnswerCorners = measureTimedValue { Day12.Part02ButUsingCorners.foo(input) }
-    println(
-        "Part 2: ${partTwoAnswerCorners.value}; Duration: ${
-            partTwoAnswerCorners.duration.toString(
-                DurationUnit.SECONDS,
-                4
-            )
-        }"
-    )
+    val partTwoCorners = measureTimedValue { Day12.Part02ButUsingCorners.foo(input) }
+    println("Part 2: ${partTwoCorners.value}; Duration: ${partTwoCorners.duration.toString(DurationUnit.SECONDS, 4)}")
 }
 
 private object Day12 {
