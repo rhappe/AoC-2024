@@ -8,6 +8,15 @@ import utils.mapValues
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
+val fakeInput = listOf(
+    "AAAAAA",
+    "AAABBA",
+    "AAABBA",
+    "ABBAAA",
+    "ABBAAA",
+    "AAAAAA",
+)
+
 fun main() {
     val input = readInput(day = 12)
 
@@ -15,7 +24,17 @@ fun main() {
     println("Part 1: ${partOneAnswer.value}; Duration: ${partOneAnswer.duration.toString(DurationUnit.SECONDS, 4)}")
 
     val partTwoAnswer = measureTimedValue { Day12.Part02.foo(input) }
-    println("Part 1: ${partTwoAnswer.value}; Duration: ${partTwoAnswer.duration.toString(DurationUnit.SECONDS, 4)}")
+    println("Part 2: ${partTwoAnswer.value}; Duration: ${partTwoAnswer.duration.toString(DurationUnit.SECONDS, 4)}")
+
+    val partTwoAnswerCorners = measureTimedValue { Day12.Part02ButUsingCorners.foo(input) }
+    println(
+        "Part 2: ${partTwoAnswerCorners.value}; Duration: ${
+            partTwoAnswerCorners.duration.toString(
+                DurationUnit.SECONDS,
+                4
+            )
+        }"
+    )
 }
 
 private object Day12 {
@@ -32,6 +51,14 @@ private object Day12 {
             val grid = Grid(input)
             val garden = Garden(grid)
             return garden.costBySide
+        }
+    }
+
+    object Part02ButUsingCorners {
+        fun foo(input: List<String>): Int {
+            val grid = Grid(input)
+            val garden = Garden(grid)
+            return garden.costBySideUsingCorners
         }
     }
 
@@ -141,6 +168,37 @@ private object Day12 {
 
             return differences.sum()
         }
+
+        val costBySideUsingCorners: Int by lazy {
+            val biDirectionals = listOf(
+                Direction.North to Direction.East,
+                Direction.South to Direction.East,
+                Direction.South to Direction.West,
+                Direction.North to Direction.West,
+            )
+
+            val numCorners = plots.sumOf { plot ->
+                biDirectionals.count { isCorner(plot, it.first, it.second) }
+            }
+            return@lazy plots.size * numCorners
+        }
+
+        private fun isCorner(plot: Plot, direction1: Direction, direction2: Direction): Boolean {
+            val check1 = plot.position + direction1 + direction2
+            val check2 = plot.position + direction1
+            val check3 = plot.position + direction2
+
+            val results = listOf(check1, check2, check3).map { check -> check in plots.map { it.position } }
+
+            return when (results) {
+                // if none of the checks are in the region, then this is a corner.
+                listOf(false, false, false) -> true
+                // if only the "unidirectional" checks are in the region, this is a corner.
+                listOf(false, true, true) -> true
+                listOf(true, false, false) -> true
+                else -> false
+            }
+        }
     }
 
     data class Garden(
@@ -150,6 +208,10 @@ private object Day12 {
 
         val costBySide: Int by lazy {
             regions.sumOf { it.costBySide }
+        }
+
+        val costBySideUsingCorners: Int by lazy {
+            regions.sumOf { it.costBySideUsingCorners }
         }
 
         operator fun plus(region: Region): Garden = Garden(
