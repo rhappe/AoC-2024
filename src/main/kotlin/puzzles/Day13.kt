@@ -9,16 +9,16 @@ import kotlin.time.measureTimedValue
 fun main() {
     val input = readInput(day = 13)
 
-    val partOneAnswer = measureTimedValue { Day13.Part01.foo(input) }
+    val partOneAnswer = measureTimedValue { Day13.Part01.calculateMinCost(input) }
     partOneAnswer.printAnswer(label = "Part 1")
 
-    val partTwoAnswer = measureTimedValue { Day13.Part02.foo(input) }
+    val partTwoAnswer = measureTimedValue { Day13.Part02.calculateMinCost(input) }
     partTwoAnswer.printAnswer(label = "Part 2")
 }
 
 private object Day13 {
     object Part01 {
-        fun foo(input: List<String>): Long {
+        fun calculateMinCost(input: List<String>): Long {
             val machines = parseClawMachines(input, IncreaseDifficultyRule.None)
             return machines.sumOf { it.calculateMinPrice(buttonCostA = 3, buttonCostB = 1) ?: 0 }
         }
@@ -26,7 +26,7 @@ private object Day13 {
 
     object Part02 {
         private const val PRIZE_LOCATION_MOVE_AMOUNT = 10000000000000
-        fun foo(input: List<String>): Long {
+        fun calculateMinCost(input: List<String>): Long {
             val rule = IncreaseDifficultyRule.MovePrizeBy(
                 delta = Coordinate(PRIZE_LOCATION_MOVE_AMOUNT, PRIZE_LOCATION_MOVE_AMOUNT),
             )
