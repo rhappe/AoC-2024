@@ -3,6 +3,7 @@ package puzzles
 import api.readInput
 import model.Coordinate
 import model.LongCoordinate
+import utils.printAnswer
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
@@ -11,10 +12,10 @@ fun main() {
     val input = readInput(day = 13)
 
     val partOneAnswer = measureTimedValue { Day13.Part01.foo(input) }
-    println("Part 1: ${partOneAnswer.value}; Duration: ${partOneAnswer.duration.toString(DurationUnit.SECONDS, 4)}")
+    partOneAnswer.printAnswer(label = "Part 1")
 
     val partTwoAnswer = measureTimedValue { Day13.Part02.foo(input) }
-    println("Part 1: ${partTwoAnswer.value}; Duration: ${partTwoAnswer.duration.toString(DurationUnit.SECONDS, 4)}")
+    partTwoAnswer.printAnswer(label = "Part 2")
 }
 
 private object Day13 {
