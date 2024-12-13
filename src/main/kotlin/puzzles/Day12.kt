@@ -6,8 +6,6 @@ import model.Direction
 import model.Grid
 import utils.mapValues
 import utils.runTimedMeasurement
-import kotlin.time.DurationUnit
-import kotlin.time.measureTimedValue
 
 fun main() {
     val input = readInput(day = 12)
@@ -43,7 +41,7 @@ private object Day12 {
     }
 
     private data class Plot(
-        val position: Coordinate,
+        val position: Coordinate<Int>,
         val fences: List<Direction>,
     ) {
         fun getCornerCount(region: Region): Int {
@@ -80,7 +78,7 @@ private object Day12 {
         val type: Char,
         val plots: List<Plot>,
     ) {
-        operator fun contains(position: Coordinate) = position in plots.map { it.position }
+        operator fun contains(position: Coordinate<Int>) = position in plots.map { it.position }
 
         val costByFenceCount: Int = plots.size * plots.sumOf { it.fences.count() }
 
@@ -165,7 +163,7 @@ private object Day12 {
     private fun Garden(grid: Grid<Char>) = GardenBuilder(grid).buildGarden()
 
     private class GardenBuilder(private val grid: Grid<Char>) {
-        private val traversedPositions = mutableSetOf<Coordinate>()
+        private val traversedPositions = mutableSetOf<Coordinate<Int>>()
 
         fun buildGarden(): Garden = Garden(
             regions = buildList {
@@ -181,7 +179,7 @@ private object Day12 {
             },
         )
 
-        private fun buildRegionPlots(type: Char, position: Coordinate): List<Plot> {
+        private fun buildRegionPlots(type: Char, position: Coordinate<Int>): List<Plot> {
             if (position in traversedPositions || position !in grid || grid[position] != type) {
                 return emptyList()
             }

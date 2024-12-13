@@ -39,13 +39,13 @@ private object Day05 {
         val currentPage = pages.first()
         val remainingPages = pages.subList(1, pages.size)
 
-        if (isPageCorrect(rules, currentPage, remainingPages)) {
+        return if (isPageCorrect(rules, currentPage, remainingPages)) {
             // if the current page is in the correct position, add it to the front of the list
             // and then continue correcting the rest of the pages.
-            return listOf(currentPage) + getCorrectedPages(rules, remainingPages)
+            listOf(currentPage) + getCorrectedPages(rules, remainingPages)
         } else {
             // if the current page is in the incorrect position, just push it to the end of the list.
-            return getCorrectedPages(rules, remainingPages + listOf(currentPage))
+            getCorrectedPages(rules, remainingPages + listOf(currentPage))
         }
     }
 

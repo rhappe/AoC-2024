@@ -1,6 +1,8 @@
 package puzzles
 
 import api.readInput
+import model.Coordinate
+import model.IntCoordinate
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
@@ -32,18 +34,18 @@ private object Day10 {
         val endpoints = getDistinctEndpoints(input, row, col, level = 0)
         return endpoints.map { endpoint ->
             Trail(
-                start = Point(row, col),
+                start = Coordinate(row, col),
                 end = endpoint,
             )
         }
     }
 
-    private fun getDistinctEndpoints(input: List<String>, row: Int, col: Int, level: Int): List<Point> {
+    private fun getDistinctEndpoints(input: List<String>, row: Int, col: Int, level: Int): List<IntCoordinate> {
         val value = input[row][col].digitToIntOrNull() ?: return emptyList()
         if (value != level) {
             return emptyList()
         } else if (value == 9) {
-            return listOf(Point(row, col))
+            return listOf(Coordinate(row, col))
         }
 
         val nextPositions = listOf(
@@ -71,13 +73,8 @@ private object Day10 {
         }
     }
 
-    private data class Point(
-        val x: Int,
-        val y: Int,
-    )
-
     private data class Trail(
-        val start: Point,
-        val end: Point,
+        val start: IntCoordinate,
+        val end: IntCoordinate,
     )
 }

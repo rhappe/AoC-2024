@@ -1,6 +1,8 @@
 package puzzles
 
 import api.readInput
+import model.Coordinate
+import model.IntCoordinate
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 
@@ -19,7 +21,7 @@ private object Day08 {
         fun countAntiNodes(input: List<String>): Int {
             val grid = parseGrid(input)
             val nodesByFrequency = grid.nodes.groupBy { it.frequency }
-            val found = mutableSetOf<Point>()
+            val found = mutableSetOf<IntCoordinate>()
             var sum = 0
             nodesByFrequency.values.forEach { nodes ->
                 for (index in nodes.indices) {
@@ -46,7 +48,7 @@ private object Day08 {
         fun countAntiNodes(input: List<String>): Int {
             val grid = parseGrid(input)
             val nodesByFrequency = grid.nodes.groupBy { it.frequency }
-            val found = mutableSetOf<Point>()
+            val found = mutableSetOf<IntCoordinate>()
             var sum = 0
             nodesByFrequency.values.forEach { nodes ->
                 for (index in nodes.indices) {
@@ -69,7 +71,7 @@ private object Day08 {
         grid: Grid,
         nodes: Pair<Node, Node>,
         distance: Int = Int.MAX_VALUE,
-    ): List<Point> = buildList {
+    ): List<IntCoordinate> = buildList {
         var distanceCounter = 0
         val delta = nodes.second.position - nodes.first.position
         addAll(
@@ -95,7 +97,7 @@ private object Day08 {
                     if (input[row][col] != '.') {
                         this += Node(
                             frequency = input[row][col],
-                            position = Point(row, col),
+                            position = Coordinate(row, col),
                         )
                     }
                 }
@@ -108,32 +110,13 @@ private object Day08 {
         val height: Int,
         val nodes: List<Node>,
     ) {
-        operator fun contains(point: Point): Boolean {
+        operator fun contains(point: IntCoordinate): Boolean {
             return point.row in 0 until height && point.col in 0 until width
         }
     }
 
     private data class Node(
         val frequency: Char,
-        val position: Point,
+        val position: Coordinate<Int>,
     )
-
-    private data class Point(
-        val row: Int,
-        val col: Int,
-    ) {
-        operator fun minus(other: Point): Point {
-            return Point(
-                row = row - other.row,
-                col = col - other.col,
-            )
-        }
-
-        operator fun plus(other: Point): Point {
-            return Point(
-                row = row + other.row,
-                col = col + other.col,
-            )
-        }
-    }
 }

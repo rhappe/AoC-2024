@@ -2,6 +2,10 @@ package puzzles
 
 import api.readInput
 import kotlinx.coroutines.*
+import model.Coordinate
+import model.Direction
+import model.Grid
+import model.IntCoordinate
 import utils.formatSeconds
 import utils.printAnswer
 import java.util.concurrent.atomic.AtomicInteger
@@ -23,9 +27,7 @@ fun main() = runBlocking {
 private object Day06 {
     object Part01 {
         fun getDistinctCoordinatesCount(input: List<String>): Int {
-            val vectors = getVisitedPositionVectors(
-                grid = input.map { it.toList() },
-            )
+            val vectors = getVisitedPositionVectors(Grid(input))
             return vectors.distinctBy { it.coordinate }.count()
         }
     }
@@ -33,7 +35,7 @@ private object Day06 {
     object Part02 {
         fun getInfiniteLoopCount(input: List<String>): Int {
             val count = AtomicInteger()
-            val grid = input.map { it.toList() }
+            val grid = Grid(input)
             runBlocking(Dispatchers.Default) {
                 for (row in grid.indices) {
                     for (col in grid.indices) {
@@ -69,8 +71,8 @@ private object Day06 {
      */
     @Throws(InfiniteLoopException::class)
     private fun getVisitedPositionVectors(
-        grid: List<List<Char>>,
-        vararg additionalObstacles: Coordinate,
+        grid: Grid<Char>,
+        vararg additionalObstacles: IntCoordinate,
     ): Set<Vector> {
         var characterPosition = getInitialCharacterPosition(grid)
         var finished = false
@@ -112,48 +114,33 @@ private object Day06 {
         error("Could not find character starting position in grid.")
     }
 
-    private operator fun <T> List<List<T>>.get(coordinate: Coordinate): T {
+    private operator fun <T> List<List<T>>.get(coordinate: IntCoordinate): T {
         return this[coordinate.row][coordinate.col]
     }
 
-    private operator fun List<List<Any>>.contains(coordinate: Coordinate): Boolean {
+    private operator fun List<List<Any>>.contains(coordinate: IntCoordinate): Boolean {
         return coordinate.row in indices && coordinate.col in this[0].indices
     }
 
     private const val OBSTACLE = '#'
 
-    private enum class FacingDirection(val character: Char) {
-        NORTH('^'),
-        EAST('>'),
-        SOUTH('v'),
-        WEST('<'),
-        ;
+    object FacingDirection {
+        private val Direction.character: Char
+            get() = when (this) {
+                Direction.North -> '^'
+                Direction.East -> '>'
+                Direction.South -> 'v'
+                Direction.West -> '<'
+            }
 
-        fun rotateClockwise(): FacingDirection = when (this) {
-            NORTH -> EAST
-            EAST -> SOUTH
-            SOUTH -> WEST
-            WEST -> NORTH
-        }
+        val characters = Direction.entries.map { it.character }.toSet()
 
-        companion object {
-            val characters = entries.map { it.character }.toSet()
-            fun fromCharacter(character: Char) = entries.first { it.character == character }
-        }
+        fun fromCharacter(character: Char) = Direction.entries.first { it.character == character }
     }
 
-    private data class Vector(val coordinate: Coordinate, val direction: FacingDirection) {
+    private data class Vector(val coordinate: IntCoordinate, val direction: Direction) {
         fun rotated(): Vector {
             return copy(direction = direction.rotateClockwise())
-        }
-    }
-
-    private data class Coordinate(val row: Int, val col: Int) {
-        operator fun plus(facingDirection: FacingDirection): Coordinate = when (facingDirection) {
-            FacingDirection.NORTH -> copy(row = row - 1)
-            FacingDirection.EAST -> copy(col = col + 1)
-            FacingDirection.SOUTH -> copy(row = row + 1)
-            FacingDirection.WEST -> copy(col = col - 1)
         }
     }
 

@@ -1,6 +1,7 @@
 package puzzles
 
 import api.readInput
+import model.Grid
 import kotlin.math.absoluteValue
 
 fun main() {
