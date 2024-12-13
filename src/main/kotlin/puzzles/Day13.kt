@@ -4,9 +4,7 @@ import api.readInput
 import model.Coordinate
 import model.LongCoordinate
 import utils.printAnswer
-import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
-
 
 fun main() {
     val input = readInput(day = 13)
