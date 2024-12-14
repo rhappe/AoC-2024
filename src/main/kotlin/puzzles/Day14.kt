@@ -6,7 +6,6 @@ import kotlinx.coroutines.runBlocking
 import model.Coordinate
 import model.IntCoordinate
 import utils.printAnswer
-import kotlin.math.floor
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlin.time.measureTimedValue
@@ -14,16 +13,20 @@ import kotlin.time.measureTimedValue
 fun main() {
     val input = readInput(day = 14)
 
-    val partOneAnswer = measureTimedValue { Day14.Part01.foo(input) }
+    val partOneAnswer = measureTimedValue { Day14.Part01.getSafetyFactorAfter100Seconds(input) }
     partOneAnswer.printAnswer(label = "Part 2")
 
-    val partTwoAnswer = measureTimedValue { Day14.Part02.foo(input) }
+//    runCatching {
+//        Day14.Part02.printAllTreesToLookForChristmasTree(input)
+//    }
+
+    val partTwoAnswer = measureTimedValue { Day14.Part02.findChristmasTreeAnomaly() }
     partTwoAnswer.printAnswer(label = "Part 2")
 }
 
 private object Day14 {
     object Part01 {
-        fun foo(input: List<String>): Int {
+        fun getSafetyFactorAfter100Seconds(input: List<String>): Int {
             val initialRobots = parseRobots(input)
             val headquarters = HeadquartersFloor(
                 robots = initialRobots,
@@ -36,35 +39,62 @@ private object Day14 {
     }
 
     object Part02 {
-        fun foo(input: List<String>): Int {
-//            val initialRobots = parseRobots(input)
-//            val initialFloor = HeadquartersFloor(
-//                robots = initialRobots,
-//                floorHeight = 103,
-//                floorWidth = 101,
-//            )
-//            
-//            var iteration = 0 // 47, 82, 150, 183, 253
-//            runBlocking {
-//                while (true) {
-//                    val heightIter = 47 + iteration * 103
-//                    val heightIterFloor = initialFloor.elapsedTimeBy(heightIter.seconds)
-//                    println("Iteration: $heightIter")
-//                    heightIterFloor.print()
-//
+        fun printAllTreesToLookForChristmasTree(input: List<String>): Int {
+            val initialRobots = parseRobots(input)
+            val initialFloor = HeadquartersFloor(
+                robots = initialRobots,
+                floorHeight = 103,
+                floorWidth = 101,
+            )
+
+            var iteration = 0 // 47, 82, 150, 183, 253
+            runBlocking {
+                do {
+                    val heightIter = 47 + iteration * 103
+                    val heightIterFloor = initialFloor.elapsedTimeBy(heightIter.seconds)
+                    println("Iteration: $heightIter")
+                    heightIterFloor.print()
+
 //                    delay(0.25.seconds)
-//
-//                    val widthIter = 82 + iteration * 101
-//                    val widthIterFloor = initialFloor.elapsedTimeBy(widthIter.seconds)
-//                    println("Iteration: $widthIter")
-//                    widthIterFloor.print()
-//
+
+                    val widthIter = 82 + iteration * 101
+                    val widthIterFloor = initialFloor.elapsedTimeBy(widthIter.seconds)
+                    println("Iteration: $widthIter")
+                    widthIterFloor.print()
+
 //                    delay(0.25.seconds)
-//
-//                    iteration++
-//                }
-//            }
-            return 7051 // I got this answer from looking at the printouts from the commented code lol
+
+                    iteration++
+                } while (heightIter > 0 && widthIter > 0)
+            }
+            error("I can't return an answer here since this approach requires human attention, but the answer is 7051")
+        }
+
+        fun findChristmasTreeAnomaly(): Int {
+            // from human observation of printing the trees
+            // an anomaly occurs at 47 seconds and then every 103 seconds after that (47, 150, 253, ...)
+            // an anomaly occurs at 82 seconds and then every 101 seconds after that (82, 183, 284, ...)
+            // So we can figure out where the two anomalies are on the same iteration. i.e.:
+            // Given: 47 + 103x = 82 + 101y, what is the value at which they are equal?
+            val heightIterCache = mutableSetOf<Int>()
+            val widthIterCache = mutableSetOf<Int>()
+
+            var iteration = 0
+            do {
+                val heightIter = 47 + iteration * 103
+                val widthIter = 82 + iteration * 101
+
+                heightIterCache += heightIter
+                widthIterCache += widthIter
+                when {
+                    widthIter in heightIterCache -> return widthIter
+                    heightIter in widthIterCache -> return heightIter
+                }
+
+                iteration++
+            } while (heightIter > 0 && widthIter > 0) // when they overflow the Int, it'll become a negative number...
+
+            error("Could not find Christmas Tree anomaly. :(")
         }
     }
 
