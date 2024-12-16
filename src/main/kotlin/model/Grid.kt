@@ -66,9 +66,3 @@ fun <T, R> Grid(data: List<List<T>>, transform: (Coordinate<Int>, T) -> R): Grid
 fun Grid(strings: List<String>): Grid<Char> = Grid(
     data = strings.map { it.toList() },
 )
-
-@JvmName("fromStrings")
-fun <R> Grid(data: List<String>, transform: (IntCoordinate, Char) -> R): Grid<R> = Grid(
-    data = data.map { it.toList() },
-    transform = transform,
-)

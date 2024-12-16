@@ -1,7 +1,7 @@
 package model
 
-typealias IntCoordinate = Coordinate<Int>
-typealias LongCoordinate = Coordinate<Long>
+typealias IntCoordinate = Coordinate.Integers
+typealias LongCoordinate = Coordinate.Longs
 
 sealed interface Coordinate<V : Number> {
     val row: V
@@ -12,21 +12,21 @@ sealed interface Coordinate<V : Number> {
     operator fun plus(other: Coordinate<V>): Coordinate<V>
 
     data class Integers(override val row: Int, override val col: Int) : Coordinate<Int> {
-        override fun plus(facingDirection: Direction): Coordinate<Int> = when (facingDirection) {
+        override fun plus(facingDirection: Direction): IntCoordinate = when (facingDirection) {
             Direction.North -> copy(row = row - 1)
             Direction.East -> copy(col = col + 1)
             Direction.South -> copy(row = row + 1)
             Direction.West -> copy(col = col - 1)
         }
 
-        override operator fun minus(other: Coordinate<Int>): Coordinate<Int> {
+        override operator fun minus(other: Coordinate<Int>): IntCoordinate {
             return Integers(
                 row = row - other.row,
                 col = col - other.col,
             )
         }
 
-        override operator fun plus(other: Coordinate<Int>): Coordinate<Int> {
+        override operator fun plus(other: Coordinate<Int>): IntCoordinate {
             return Integers(
                 row = row + other.row,
                 col = col + other.col,
@@ -35,21 +35,21 @@ sealed interface Coordinate<V : Number> {
     }
 
     data class Longs(override val row: Long, override val col: Long) : Coordinate<Long> {
-        override fun plus(facingDirection: Direction): Coordinate<Long> = when (facingDirection) {
+        override fun plus(facingDirection: Direction): LongCoordinate = when (facingDirection) {
             Direction.North -> copy(row = row - 1)
             Direction.East -> copy(col = col + 1)
             Direction.South -> copy(row = row + 1)
             Direction.West -> copy(col = col - 1)
         }
 
-        override operator fun minus(other: Coordinate<Long>): Coordinate<Long> {
+        override operator fun minus(other: Coordinate<Long>): LongCoordinate {
             return Longs(
                 row = row - other.row,
                 col = col - other.col,
             )
         }
 
-        override operator fun plus(other: Coordinate<Long>): Coordinate<Long> {
+        override operator fun plus(other: Coordinate<Long>): LongCoordinate {
             return Longs(
                 row = row + other.row,
                 col = col + other.col,

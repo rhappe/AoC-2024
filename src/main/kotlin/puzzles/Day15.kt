@@ -20,7 +20,7 @@ fun main() {
 private object Day15 {
     object Part01 {
         fun foo(input: List<String>): Int {
-            var warehouse = parseWarehouse(input)
+            var warehouse = parseWarehouse(input, entityWidth = 1)
             val moves = parseMoves(input)
             moves.forEach { warehouse = warehouse.moved(it) }
             return calculateBoxCoordinates(warehouse)
@@ -29,11 +29,14 @@ private object Day15 {
 
     object Part02 {
         fun foo(input: List<String>): Int {
-            TODO()
+            var warehouse = parseWarehouse(input, entityWidth = 2)
+            val moves = parseMoves(input)
+            moves.forEach { warehouse = warehouse.moved(it) }
+            return calculateBoxCoordinates(warehouse)
         }
     }
 
-    private fun parseWarehouse(input: List<String>): Warehouse {
+    private fun parseWarehouse(input: List<String>, entityWidth: Int): Warehouse {
         val emptyIndex = input.indexOfFirst { it == "" }
         val walls = mutableListOf<IntCoordinate>()
         val boxes = mutableListOf<IntCoordinate>()
@@ -42,9 +45,14 @@ private object Day15 {
         for (row in 0 until emptyIndex) {
             for (col in input[row].indices) {
                 when (input[row][col]) {
-                    '@' -> if (robot == null) robot = Coordinate(row, col) else error("Multiple robots found!")
-                    'O' -> boxes += Coordinate(row, col)
-                    '#' -> walls += Coordinate(row, col)
+                    '@' -> if (robot == null) {
+                        robot = Coordinate(row, col * entityWidth)
+                    } else {
+                        error("Multiple robots found!")
+                    }
+
+                    'O' -> boxes += Coordinate(row, col * entityWidth)
+                    '#' -> walls += Coordinate(row, col * entityWidth)
                 }
             }
         }
@@ -56,9 +64,23 @@ private object Day15 {
         return Warehouse(
             height = emptyIndex,
             width = input[0].length,
-            robot = robot,
-            walls = walls.toSet(),
-            boxes = boxes.toSet(),
+            robot = WarehouseEntity(
+                position = robot,
+                width = 1,
+            ),
+            walls = walls.map {
+                WarehouseEntity(
+                    position = it,
+                    width = entityWidth,
+                )
+            },
+            boxes = boxes.map {
+                WarehouseEntity(
+                    position = it,
+                    width = entityWidth,
+                )
+            },
+            entityWidth = entityWidth,
         )
     }
 
@@ -77,50 +99,122 @@ private object Day15 {
     }
 
     private fun calculateBoxCoordinates(warehouse: Warehouse): Int {
-        return warehouse.boxes.sumOf { it.row * 100 + it.col }
+        return warehouse.boxes.sumOf { it.position.row * 100 + it.position.col }
+    }
+
+    private data class WarehouseEntity(
+        val position: IntCoordinate,
+        val width: Int,
+    ) {
+        val coverage = List(width) {
+            position.copy(col = position.col + it)
+        }
+
+        infix operator fun contains(position: IntCoordinate): Boolean {
+            return position in coverage
+        }
+
+        fun moved(direction: Direction): WarehouseEntity = copy(
+            position = position + direction,
+        )
+
+        fun getAdjacentPositions(direction: Direction): List<IntCoordinate> = when (direction) {
+            Direction.North, Direction.South -> coverage.map { it + direction }
+            Direction.East -> listOf(coverage.last() + direction)
+            Direction.West -> listOf(coverage.first() + direction)
+        }
+    }
+
+    private infix operator fun Collection<WarehouseEntity>.contains(position: IntCoordinate): Boolean {
+        return any { position in it }
     }
 
     private data class Warehouse(
         val height: Int,
         val width: Int,
-        val robot: IntCoordinate,
-        val boxes: Set<IntCoordinate>,
-        val walls: Set<IntCoordinate>,
+        val robot: WarehouseEntity,
+        val boxes: List<WarehouseEntity>,
+        val walls: List<WarehouseEntity>,
+        val entityWidth: Int = 1,
     ) {
+        private val entities = boxes + walls
+
         fun moved(direction: Direction): Warehouse {
-            var nextPosition = robot + direction
-            if (nextPosition.isEmptySpace) {
-                return copy(robot = robot + direction)
+            val movedRobot = robot.moved(direction)
+            val nextEntity = entities.firstOrNull { movedRobot.position in it }
+            if (nextEntity == null) {
+                // we can't find an entity at this position, then the robot can just move there.
+                return copy(robot = movedRobot)
             }
 
-            // iterate until we run into a wall.
-            while (nextPosition !in walls) {
-                if (nextPosition.isEmptySpace) {
-                    val newRobotPosition = robot + direction
-                    return copy(
-                        robot = newRobotPosition,
-                        boxes = boxes + nextPosition - newRobotPosition,
-                    )
-                }
-                nextPosition += direction
+            val movableEntities = getMovableEntities(nextEntity, direction).toSet()
+            val movedEntities = movableEntities.map { it.moved(direction) }
+            movedEntities.any { entity ->
+                walls.any { entity.position in it }
             }
-
-            // a wall was encountered without finding an empty space,
-            // so nothing changes.
-            return this
+            val isInWalls = movedEntities.flatMap { it.coverage }.any { it in walls }
+            return if (movedEntities.isEmpty() || isInWalls) {
+                this
+            } else {
+                copy(
+                    boxes = boxes - movableEntities + movedEntities,
+                    robot = movedRobot,
+                )
+            }
         }
 
-        private val IntCoordinate.isEmptySpace: Boolean
-            get() = robot != this && this !in boxes && this !in walls
+        private fun getMovableEntities(entity: WarehouseEntity, direction: Direction): List<WarehouseEntity> {
+            return when (entity.position) {
+                // if the current entity is a wall, it can't be moved, and we should not move it.
+                in walls -> emptyList()
+                // if the current entity is a box, we can move it, and we should try to find what else it'll push.
+                in boxes -> {
+                    val adjacentEntities = entity.getAdjacentPositions(direction).mapNotNull { position ->
+                        entities.firstOrNull { position in it }
+                    }
+
+                    adjacentEntities.flatMap { getMovableEntities(it, direction) } + entity
+                }
+                // otherwise, it's an empty space, which really shouldn't happen since the position we're checking
+                // is derived from a warehouse entity...
+                else -> error(
+                    "Could not find a warehouse entity at the specified position: ${entity.position}\n\n$this",
+                )
+            }
+        }
 
         override fun toString(): String = buildString {
             for (row in 0 until height) {
-                for (col in 0 until width) {
+                var col = 0
+                while (col < width * entityWidth) {
                     when (Coordinate(row, col)) {
-                        robot -> append("@")
-                        in walls -> append("#")
-                        in boxes -> append("O")
-                        else -> append(".")
+                        in robot -> {
+                            append("@")
+                            col++
+                        }
+
+                        in walls -> {
+                            append("#".repeat(entityWidth))
+                            col += entityWidth
+                        }
+
+                        in boxes -> {
+                            when (entityWidth) {
+                                1 -> append("0")
+                                2 -> append("[]")
+                                else -> {
+                                    append("[")
+                                    append("=".repeat(entityWidth - 2))
+                                    append("]")
+                                }
+                            }
+                            col += entityWidth
+                        }
+
+                        else -> {
+                            append(".")
+                            col++
+                        }
                     }
                 }
                 appendLine()

@@ -117,6 +117,6 @@ private object Day08 {
 
     private data class Node(
         val frequency: Char,
-        val position: Coordinate<Int>,
+        val position: IntCoordinate,
     )
 }
