@@ -106,9 +106,7 @@ private object Day15 {
         val position: IntCoordinate,
         val width: Int,
     ) {
-        val coverage = List(width) {
-            position.copy(col = position.col + it)
-        }
+        val coverage = List(width) { position.copy(col = position.col + it) }
 
         infix operator fun contains(position: IntCoordinate): Boolean {
             return position in coverage
@@ -149,9 +147,6 @@ private object Day15 {
 
             val movableEntities = getMovableEntities(nextEntity, direction).toSet()
             val movedEntities = movableEntities.map { it.moved(direction) }
-            movedEntities.any { entity ->
-                walls.any { entity.position in it }
-            }
             val isInWalls = movedEntities.flatMap { it.coverage }.any { it in walls }
             return if (movedEntities.isEmpty() || isInWalls) {
                 this
