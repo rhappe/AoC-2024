@@ -2,7 +2,6 @@ package puzzles
 
 import api.readInput
 import utils.printAnswer
-import java.io.OutputStream
 import kotlin.math.pow
 import kotlin.time.measureTimedValue
 
@@ -20,13 +19,58 @@ private object Day17 {
     object Part01 {
         fun foo(input: List<String>): String {
             val completed = parseInput(input).runProgram()
-            return completed.outputBuffer.toString()
+            return completed.output.joinToString(",")
         }
     }
 
     object Part02 {
-        fun foo(input: List<String>): String {
-            return parseInput(input).outputBuffer.toString()
+        fun foo(input: List<String>): Long? {
+            val computer = parseInput(input)
+            val registerAValue = reverseEngineerMinRegisterAValue(computer) ?: return null
+
+            // check if it's correct
+            val checkResult = computer.copy(registerA = registerAValue).runProgram()
+            check(checkResult.output == computer.program) {
+                """
+                The register A value $registerAValue does not generate the original program sequence.
+                Expected: ${computer.program.joinToString(separator = ",")}
+                Actual: ${computer.output.joinToString(separator = ",")}
+                """.trimIndent()
+            }
+            return registerAValue
+        }
+
+        private fun findPossibleStartingValue(
+            previousRegisterAValue: Long,
+            computer: Computer,
+            expectedOutput: Int,
+        ): List<Long> = buildList {
+            // take the previous register a value and multiply it by 8. This effectively shifts the
+            // bits left by 3 (shl 3 would work too). This works because we are working with a 3 bit
+            // number, so anything beyond the first 3 bits doesn't matter for the current iteration.
+            // so multiply by 8 each iteration and find a value that generates the desired output.
+            val contenders = (0L until 8L).map { (previousRegisterAValue * 8) + it }
+            contenders.forEach { contender ->
+                val result = computer.copy(registerA = contender).runProgram()
+                if (result.output.first() == expectedOutput) {
+                    add(contender)
+                }
+            }
+        }
+
+        private fun reverseEngineerMinRegisterAValue(computer: Computer): Long? {
+            var startingValueCandidates = listOf(0L)
+
+            computer.program.reversed().forEach { instruction ->
+                // use the previous candidate values to build a list of new candidate values
+                startingValueCandidates = startingValueCandidates.flatMap { value ->
+                    findPossibleStartingValue(value, computer, instruction)
+                }
+            }
+
+            return startingValueCandidates.sorted().firstOrNull {
+                computer.copy(registerA = it).runProgram().output == computer.program
+            }
         }
     }
 
@@ -37,32 +81,20 @@ private object Day17 {
         val programString = input[4]
 
         return Computer(
-            registerA = registerAString.split(": ")[1].toInt(),
-            registerB = registerBString.split(": ")[1].toInt(),
-            registerC = registerCString.split(": ")[1].toInt(),
+            registerA = registerAString.split(": ")[1].toLong(),
+            registerB = registerBString.split(": ")[1].toLong(),
+            registerC = registerCString.split(": ")[1].toLong(),
             program = programString.split(": ")[1].split(",").map(String::toInt),
         )
     }
 
-    private class StandardOutput : OutputStream() {
-        private val buffer = mutableListOf<Int>()
-
-        override fun write(b: Int) {
-            buffer += b
-        }
-
-        override fun toString(): String {
-            return buffer.joinToString(",")
-        }
-    }
-
     private data class Computer(
-        val registerA: Int,
-        val registerB: Int,
-        val registerC: Int,
+        val registerA: Long,
+        val registerB: Long,
+        val registerC: Long,
         val program: List<Int>,
         val pointer: Int = 0,
-        val outputBuffer: OutputStream = StandardOutput(),
+        val output: List<Int> = emptyList(),
     ) {
         private val currentInstruction: Instruction? = when (pointer) {
             in program.indices -> Instruction(
@@ -77,7 +109,9 @@ private object Day17 {
             return currentInstruction?.invoke(this)?.runProgram() ?: this
         }
 
-        fun print(value: Int) = outputBuffer.write(value)
+        override fun toString(): String = buildString {
+            append("Output: ${output.joinToString(separator = ",")}")
+        }
     }
 
     private data class Instruction(
@@ -116,9 +150,9 @@ private object Day17 {
         data object Adv : Operator {
             override fun invoke(computer: Computer, operand: Operand): Computer {
                 val numerator = computer.registerA
-                val denominator = 2.0.pow(operand.comboValue(computer))
+                val denominator = 2.0.pow(operand.comboValue(computer).toDouble())
                 return computer.copy(
-                    registerA = (numerator / denominator).toInt(),
+                    registerA = (numerator / denominator).toLong(),
                     pointer = computer.pointer + 2,
                 )
             }
@@ -128,7 +162,7 @@ private object Day17 {
         data object Bxl : Operator {
             override fun invoke(computer: Computer, operand: Operand): Computer {
                 return computer.copy(
-                    registerB = computer.registerB xor operand.literal,
+                    registerB = computer.registerB xor operand.literal.toLong(),
                     pointer = computer.pointer + 2,
                 )
             }
@@ -148,7 +182,7 @@ private object Day17 {
         data object Jnz : Operator {
             override fun invoke(computer: Computer, operand: Operand): Computer {
                 return when {
-                    computer.registerA == 0 -> computer.copy(pointer = computer.pointer + 2)
+                    computer.registerA == 0L -> computer.copy(pointer = computer.pointer + 2)
                     else -> computer.copy(pointer = operand.literal)
                 }
             }
@@ -167,8 +201,10 @@ private object Day17 {
         // opcode 5
         data object Out : Operator {
             override fun invoke(computer: Computer, operand: Operand): Computer {
-                computer.print(operand.comboValue(computer) % 8)
-                return computer.copy(pointer = computer.pointer + 2)
+                return computer.copy(
+                    pointer = computer.pointer + 2,
+                    output = computer.output + (operand.comboValue(computer) % 8).toInt(),
+                )
             }
         }
 
@@ -176,9 +212,9 @@ private object Day17 {
         data object Bdv : Operator {
             override fun invoke(computer: Computer, operand: Operand): Computer {
                 val numerator = computer.registerA
-                val denominator = 2.0.pow(operand.comboValue(computer))
+                val denominator = 2.0.pow(operand.comboValue(computer).toDouble())
                 return computer.copy(
-                    registerB = (numerator / denominator).toInt(),
+                    registerB = (numerator / denominator).toLong(),
                     pointer = computer.pointer + 2,
                 )
             }
@@ -189,9 +225,9 @@ private object Day17 {
         data object Cdv : Operator {
             override fun invoke(computer: Computer, operand: Operand): Computer {
                 val numerator = computer.registerA
-                val denominator = 2.0.pow(operand.comboValue(computer))
+                val denominator = 2.0.pow(operand.comboValue(computer).toDouble())
                 return computer.copy(
-                    registerC = (numerator / denominator).toInt(),
+                    registerC = (numerator / denominator).toLong(),
                     pointer = computer.pointer + 2,
                 )
             }
@@ -201,28 +237,28 @@ private object Day17 {
     private sealed interface Operand {
         val literal: Int
 
-        fun comboValue(computer: Computer): Int
+        fun comboValue(computer: Computer): Long
 
         data class Literal(override val literal: Int) : Operand {
-            override fun comboValue(computer: Computer): Int {
-                return literal
+            override fun comboValue(computer: Computer): Long {
+                return literal.toLong()
             }
         }
 
         data class RegisterA(override val literal: Int) : Operand {
-            override fun comboValue(computer: Computer): Int {
+            override fun comboValue(computer: Computer): Long {
                 return computer.registerA
             }
         }
 
         data class RegisterB(override val literal: Int) : Operand {
-            override fun comboValue(computer: Computer): Int {
+            override fun comboValue(computer: Computer): Long {
                 return computer.registerB
             }
         }
 
         data class RegisterC(override val literal: Int) : Operand {
-            override fun comboValue(computer: Computer): Int {
+            override fun comboValue(computer: Computer): Long {
                 return computer.registerC
             }
         }
