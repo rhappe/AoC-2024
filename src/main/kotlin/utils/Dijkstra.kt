@@ -7,17 +7,21 @@ data class DijkstraResult<T>(
     val distances: Map<T, Int>,
     val neighborsBlock: (T) -> Set<T>,
 ) {
-    infix fun shortestPathTo(end: T): ArrayDeque<T> {
-        val distances = distances.withDefault { Int.MAX_VALUE }
-        var currentNode = end
-        val pathNodes = buildList {
-            do {
-                add(currentNode)
-                currentNode = neighborsBlock(currentNode).minBy { distances.getValue(it) }
-            } while (currentNode != start)
+    infix fun shortestPathTo(end: T): ArrayDeque<T>? {
+        var currentNode: T = end
+        val pathNodes = mutableListOf<T>()
+
+        while (currentNode != start) {
+            val next = neighborsBlock(currentNode).filter {
+                it in distances.keys
+            }.minByOrNull {
+                distances.getValue(it)
+            }
+            if (next == null) return null
+            pathNodes += currentNode
+            currentNode = next
         }
-        // reverse the paths since they were added in reverse order,
-        // and add the end node to the list since it wasn't added in iteration.
+        // reverse the paths since they were added in reverse order.
         return ArrayDeque(pathNodes.reversed())
     }
 }
