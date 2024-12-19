@@ -12,17 +12,17 @@ data class DijkstraResult<T>(
         val pathNodes = mutableListOf<T>()
 
         while (currentNode != start) {
-            val next = neighborsBlock(currentNode).filter {
-                it in distances.keys
-            }.minByOrNull {
-                distances.getValue(it)
-            }
+            val next = getValidNeighbors(currentNode).minByOrNull { distances.getValue(it) }
             if (next == null) return null
             pathNodes += currentNode
             currentNode = next
         }
         // reverse the paths since they were added in reverse order.
         return ArrayDeque(pathNodes.reversed())
+    }
+
+    private fun getValidNeighbors(node: T): Set<T> {
+        return neighborsBlock(node).filter { it in distances.keys }.toSet()
     }
 }
 
