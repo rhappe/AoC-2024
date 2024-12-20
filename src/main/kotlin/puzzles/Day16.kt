@@ -1,7 +1,6 @@
 package puzzles
 
 import api.readInput
-import input.FakeInput
 import model.Coordinate
 import model.Direction
 import model.IntCoordinate
@@ -11,7 +10,7 @@ import utils.printAnswer
 import kotlin.time.measureTimedValue
 
 fun main() {
-    val input = FakeInput.Day16.input//readInput(day = 16)
+    val input = readInput(day = 16)
 
     val partOneAnswer = measureTimedValue { Day16.Part01.foo(input) }
     partOneAnswer.printAnswer(label = "Part 1")
