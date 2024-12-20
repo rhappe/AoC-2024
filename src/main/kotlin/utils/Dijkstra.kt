@@ -63,7 +63,7 @@ data class DijkstraResult<T>(
 
 typealias WeightedNode<T> = Pair<T, Int>
 
-fun <T> dijkstra(nodes: Collection<T>, start: T, neighborsBlock: (T) -> Set<WeightedNode<T>>): DijkstraResult<T> {
+fun <T> dijkstra(nodes: Collection<T>, start: T, neighborsBlock: (T) -> Collection<WeightedNode<T>>): DijkstraResult<T> {
     val distances = mutableMapOf<T, Int>().withDefault { Int.MAX_VALUE }
     val priorityQueue = PriorityQueue<WeightedNode<T>>(compareBy { it.second })
 
@@ -72,7 +72,8 @@ fun <T> dijkstra(nodes: Collection<T>, start: T, neighborsBlock: (T) -> Set<Weig
 
     while (priorityQueue.isNotEmpty()) {
         val (node, currentDistance) = priorityQueue.poll()
-        val neighborNodes = neighborsBlock(node).filter { (next, _) -> next in nodes }
+        val unfiltered = neighborsBlock(node)
+        val neighborNodes = unfiltered//.filter { (next, _) -> next in nodes }
         for ((next, weight) in neighborNodes) {
             val nextDistance = currentDistance + weight
             if (nextDistance < distances.getValue(next)) {

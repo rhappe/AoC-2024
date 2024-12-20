@@ -67,3 +67,7 @@ val <V : Number> Coordinate<V>.y: V
 fun Coordinate(row: Int, col: Int) = Coordinate.Integers(row, col)
 
 fun Coordinate(row: Long, col: Long) = Coordinate.Longs(row, col)
+
+inline infix fun <V : Number, reified T : Coordinate<V>> T.inDirections(
+    directions: Collection<Direction>
+): Collection<T> = directions.map { (this + it) as T }
