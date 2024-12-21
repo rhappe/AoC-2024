@@ -22,7 +22,10 @@ data class DijkstraResult<T>(
             pathNodes += currentNode
             currentNode = next
         }
-        // reverse the paths since they were added in reverse order.
+
+        // finally add the start to the end of the list,
+        // then reverse the paths since they were added in reverse order.
+        pathNodes += start
         return ArrayDeque(pathNodes.reversed())
     }
 
@@ -63,7 +66,11 @@ data class DijkstraResult<T>(
 
 typealias WeightedNode<T> = Pair<T, Int>
 
-fun <T> dijkstra(nodes: Collection<T>, start: T, neighborsBlock: (T) -> Collection<WeightedNode<T>>): DijkstraResult<T> {
+fun <T> dijkstra(
+    nodes: Collection<T>,
+    start: T,
+    neighborsBlock: (T) -> Collection<WeightedNode<T>>
+): DijkstraResult<T> {
     val distances = mutableMapOf<T, Int>().withDefault { Int.MAX_VALUE }
     val priorityQueue = PriorityQueue<WeightedNode<T>>(compareBy { it.second })
 

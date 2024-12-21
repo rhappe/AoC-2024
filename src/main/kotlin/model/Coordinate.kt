@@ -1,5 +1,7 @@
 package model
 
+import kotlin.math.absoluteValue
+
 typealias IntCoordinate = Coordinate.Integers
 typealias LongCoordinate = Coordinate.Longs
 
@@ -10,6 +12,12 @@ sealed interface Coordinate<V : Number> {
     operator fun plus(facingDirection: Direction): Coordinate<V>
     operator fun minus(other: Coordinate<V>): Coordinate<V>
     operator fun plus(other: Coordinate<V>): Coordinate<V>
+
+    /**
+     * Calculates the manhattan distance:
+     * (x1 - x2).absoluteValue + (y1 - y2).absoluteValue
+     */
+    infix fun distanceTo(other: Coordinate<V>): V
 
     data class Integers(override val row: Int, override val col: Int) : Coordinate<Int> {
         override fun plus(facingDirection: Direction): IntCoordinate = when (facingDirection) {
@@ -31,6 +39,10 @@ sealed interface Coordinate<V : Number> {
                 row = row + other.row,
                 col = col + other.col,
             )
+        }
+
+        override fun distanceTo(other: Coordinate<Int>): Int {
+            return (this - other).let { it.row.absoluteValue + it.col.absoluteValue }
         }
     }
 
@@ -54,6 +66,11 @@ sealed interface Coordinate<V : Number> {
                 row = row + other.row,
                 col = col + other.col,
             )
+        }
+
+        // abs(x1-x2) + abs(y1-y2)
+        override fun distanceTo(other: Coordinate<Long>): Long {
+            return (this - other).let { it.row.absoluteValue + it.col.absoluteValue }
         }
     }
 }
