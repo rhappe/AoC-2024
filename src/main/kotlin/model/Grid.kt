@@ -1,7 +1,17 @@
 package model
 
 class Grid<T>(data: List<List<T>>) : List<List<T>> by data {
-    operator fun get(coordinate: Coordinate<Int>): T {
+    private val valueIndex: Map<T, IntCoordinate> by lazy {
+        mapValuesIndexed { coordinate, item ->
+            item to coordinate
+        }.toMap()
+    }
+
+    operator fun get(value: T): IntCoordinate {
+        return valueIndex.getValue(value)
+    }
+
+    operator fun get(coordinate: IntCoordinate): T {
         return this[coordinate.row, coordinate.col]
     }
 
@@ -9,11 +19,11 @@ class Grid<T>(data: List<List<T>>) : List<List<T>> by data {
         return this[row][col]
     }
 
-    operator fun contains(coordinate: Coordinate<Int>): Boolean {
+    operator fun contains(coordinate: IntCoordinate): Boolean {
         return coordinate.row in indices && coordinate.col in first().indices
     }
 
-    inline fun forEachCoordinate(block: (Coordinate<Int>) -> Unit) {
+    inline fun forEachCoordinate(block: (IntCoordinate) -> Unit) {
         for (row in indices) {
             for (col in this[row].indices) {
                 block(Coordinate(row, col))
@@ -25,11 +35,11 @@ class Grid<T>(data: List<List<T>>) : List<List<T>> by data {
         block(this[it])
     }
 
-    inline fun forEachIndexed(block: (Coordinate<Int>, T) -> Unit) = forEachCoordinate {
+    inline fun forEachIndexed(block: (IntCoordinate, T) -> Unit) = forEachCoordinate {
         block(it, this[it])
     }
 
-    inline fun <T> mapCoordinates(block: (Coordinate<Int>) -> T): List<T> {
+    inline fun <R> mapCoordinates(block: (IntCoordinate) -> R): List<R> {
         val grid = this
         return buildList {
             for (row in grid.indices) {
@@ -40,16 +50,16 @@ class Grid<T>(data: List<List<T>>) : List<List<T>> by data {
         }
     }
 
-    inline fun mapValues(block: (T) -> Unit) = mapCoordinates {
+    inline fun <R> mapValues(block: (T) -> R) = mapCoordinates {
         block(this[it])
     }
 
-    inline fun mapValuesIndexed(block: (Coordinate<Int>, T) -> Unit) = mapCoordinates {
+    inline fun <R> mapValuesIndexed(block: (IntCoordinate, T) -> R) = mapCoordinates {
         block(it, this[it])
     }
 }
 
-fun <T, R> Grid(data: List<List<T>>, transform: (Coordinate<Int>, T) -> R): Grid<R> = Grid(
+fun <T, R> Grid(data: List<List<T>>, transform: (IntCoordinate, T) -> R): Grid<R> = Grid(
     data = buildList {
         for (row in data.indices) {
             add(
