@@ -4,6 +4,7 @@ import api.readInput
 import model.Coordinate
 import model.Direction
 import model.Grid
+import model.IntCoordinate
 import utils.mapValues
 import utils.runTimedMeasurement
 
@@ -179,7 +180,7 @@ private object Day12 {
             },
         )
 
-        private fun buildRegionPlots(type: Char, position: Coordinate<Int>): List<Plot> {
+        private fun buildRegionPlots(type: Char, position: IntCoordinate): List<Plot> {
             if (position in traversedPositions || position !in grid || grid[position] != type) {
                 return emptyList()
             }
