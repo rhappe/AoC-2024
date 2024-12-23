@@ -80,7 +80,7 @@ fun <T> dijkstra(
     while (priorityQueue.isNotEmpty()) {
         val (node, currentDistance) = priorityQueue.poll()
         val unfiltered = neighborsBlock(node)
-        val neighborNodes = unfiltered//.filter { (next, _) -> next in nodes }
+        val neighborNodes = unfiltered.filter { (next, _) -> next in nodes }
         for ((next, weight) in neighborNodes) {
             val nextDistance = currentDistance + weight
             if (nextDistance < distances.getValue(next)) {

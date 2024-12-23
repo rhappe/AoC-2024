@@ -18,11 +18,7 @@ data class DirectedGraph<T>(
         return dijkstra(
             nodes = nodes,
             start = startNode,
-            neighborsBlock = { node ->
-                with(node) {
-                    edgeNodes.map { (node, distance) -> WeightedNode(node, distance) }
-                }
-            }
+            neighborsBlock = { it.weightedEdgeNodes },
         )
     }
 
@@ -30,15 +26,57 @@ data class DirectedGraph<T>(
         return nodes.first { it.value == value }
     }
 
+    private val Node<T>.edgeNodes: Set<Node<T>>
+        get() = edgeValues.map { findNode(it.key) }.toSet()
+
+    private val Node<T>.weightedEdgeNodes: Set<WeightedNode<Node<T>>>
+        get() = edgeValues.mapKeys { (value, _) -> findNode(value) }
+            .map { (node, distance) -> WeightedNode(node, distance) }
+            .toSet()
+
+
     data class Node<T>(
         val value: T,
         val edgeValues: Map<T, Int>,
     ) {
-        val DirectedGraph<T>.edgeNodes: Map<Node<T>, Int>
-            get() = edgeValues.mapKeys { (value, _) -> findNode(value) }
-
         override fun toString(): String {
             return "DirectedGraph.Node(value=$value, edges=${edgeValues.map { it.key }})"
+        }
+    }
+
+    fun findCliques(maxCliqueSize: Int = Int.MAX_VALUE): Collection<Set<Node<T>>> {
+        return findCliques(
+            clique = emptySet(),
+            candidates = nodes.toSet(),
+            disqualified = emptySet(),
+            maxCliqueSize = maxCliqueSize,
+        )
+    }
+
+    private fun findCliques(
+        clique: Set<Node<T>>,
+        candidates: Set<Node<T>>,
+        disqualified: Set<Node<T>>,
+        maxCliqueSize: Int,
+    ): Collection<Set<Node<T>>> = buildList {
+        if (clique.size > 1) {
+            add(clique)
+        }
+
+        if (clique.size < maxCliqueSize && (candidates.isNotEmpty() || disqualified.isNotEmpty())) {
+            val mutableCandidates = candidates.toMutableSet()
+            val mutableDisqualified = disqualified.toMutableSet()
+            for (candidate in candidates) {
+                this += findCliques(
+                    clique = clique + candidate,
+                    candidates = mutableCandidates.intersect(candidate.edgeNodes),
+                    disqualified = mutableDisqualified.intersect(candidate.edgeNodes),
+                    maxCliqueSize = maxCliqueSize,
+                )
+
+                mutableCandidates -= candidate
+                mutableDisqualified += candidate
+            }
         }
     }
 }
