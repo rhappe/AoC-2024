@@ -11,9 +11,12 @@ fun AdventOfCodeInputApi(cacheDir: String = "input") = AdventOfCodeInputApi(
     cachingStrategy = AdventOfCodeInputApi.CachingStrategy.LocalTextFile(cacheDir),
 )
 
-fun readInput(day: Int): List<String> {
+fun readInput(
+    day: Int,
+    year: Int = 2024,
+): List<String> {
     val result = AdventOfCodeInputApi().blockingReadInput(
-        year = 2024,
+        year = year,
         day = day,
         sessionToken = readSessionToken(),
     )

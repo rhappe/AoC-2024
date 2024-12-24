@@ -1,4 +1,4 @@
-package puzzles
+package puzzles.twenty24
 
 import kotlin.test.Test
 import kotlin.test.assertEquals

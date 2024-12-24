@@ -1,11 +1,8 @@
-package puzzles
+package puzzles.twenty24
 
 import api.readInput
-import kotlinx.coroutines.flow.*
 import model.Coordinate
-import model.Direction
 import model.Grid
-import model.IntCoordinate
 import solution.Solution
 import utils.printAnswer
 import kotlin.math.absoluteValue

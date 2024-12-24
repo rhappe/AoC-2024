@@ -1,7 +1,6 @@
-package puzzles
+package puzzles.twenty24
 
 import api.readInput
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import model.Coordinate
 import model.IntCoordinate

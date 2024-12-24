@@ -1,7 +1,7 @@
-package puzzles
+package puzzles.twenty24
 
 import kotlin.test.Test
-import puzzles.Day22.Secret
+import puzzles.twenty24.Day22.Secret
 import kotlin.test.assertEquals
 
 

@@ -1,4 +1,4 @@
-package puzzles
+package puzzles.twenty24
 
 import api.readInput
 import kotlin.time.DurationUnit

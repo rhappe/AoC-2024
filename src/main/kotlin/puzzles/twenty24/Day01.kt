@@ -1,4 +1,4 @@
-package puzzles
+package puzzles.twenty24
 
 import api.API_LINE_ITEM_SEPARATOR
 import api.readInput
