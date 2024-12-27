@@ -20,6 +20,8 @@ fun main() {
 }
 
 class Day21(input: List<String>) {
+    private val shortestPathCache = mutableMapOf<Pair<String, Int>, Long>()
+
     val part1 = Solution {
         input.sumOf { getShortestPathCost(code = it, depth = 2) }
     }
@@ -28,9 +30,6 @@ class Day21(input: List<String>) {
         input.sumOf { getShortestPathCost(code = it, depth = 25) }
     }
 
-    companion object {
-        val shortestPathCache = mutableMapOf<Pair<String, Int>, Long>()
-    }
 
     private fun getShortestPathCost(code: String, depth: Int): Long {
         return code.filter { it.isDigit() }.toLong() * findShortestPathCost(code, depth)
@@ -41,7 +40,7 @@ class Day21(input: List<String>) {
         depth: Int,
         keypad: Keypad = Keypad.Numeric,
     ): Long = shortestPathCache.getOrPut(code to depth) {
-        "${keypad.enterKey}$code".zipWithNext().sumOf { transition ->
+        "A$code".zipWithNext().sumOf { transition ->
             keypad[transition.first, transition.second].minOf {
                 when (depth) {
                     0 -> it.length.toLong()
@@ -52,22 +51,13 @@ class Day21(input: List<String>) {
     }
 
     sealed class Keypad {
-        companion object {
-            private val transitionsCache = mutableMapOf<Pair<Char, Char>, List<String>>()
-        }
-
-        open val enterKey = 'A'
         protected abstract val keypad: Grid<Char>
 
-        operator fun get(start: Char, end: Char): List<String> {
-            return transitionsCache.getOrPut(start to end) {
-                buildPathsInDirection(
-                    current = keypad[start],
-                    delta = keypad[end] - keypad[start],
-                    transform = { it + enterKey }, // add 'A' to the end of each path.
-                )
-            }
-        }
+        operator fun get(start: Char, end: Char): List<String> = buildPathsInDirection(
+            current = keypad[start],
+            delta = keypad[end] - keypad[start],
+            transform = { it + 'A' }, // add 'A' to the end of each path.
+        )
 
         private fun buildPathsInDirection(
             current: IntCoordinate,
