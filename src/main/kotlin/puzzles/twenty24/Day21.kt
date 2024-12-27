@@ -2,12 +2,11 @@ package puzzles.twenty24
 
 import api.readInput
 import model.Coordinate
+import model.Direction
 import model.Grid
 import model.IntCoordinate
 import solution.Solution
 import utils.printAnswer
-import java.security.KeyPair
-import kotlin.math.absoluteValue
 import kotlin.time.measureTimedValue
 
 fun main() {
@@ -29,12 +28,12 @@ class Day21(input: List<String>) {
         input.sumOf { getShortestPathCost(code = it, depth = 25) }
     }
 
-    private val shortestPathCache = mutableMapOf<Pair<String, Int>, Long>()
-    private val transitionsCache = mutableMapOf<Pair<Char, Char>, String>()
+    companion object {
+        val shortestPathCache = mutableMapOf<Pair<String, Int>, Long>()
+    }
 
     private fun getShortestPathCost(code: String, depth: Int): Long {
-        val shortestPathLength = findShortestPathCost(code, depth)
-        return code.filter { it.isDigit() }.toLong() * shortestPathLength
+        return code.filter { it.isDigit() }.toLong() * findShortestPathCost(code, depth)
     }
 
     private fun findShortestPathCost(
@@ -42,50 +41,80 @@ class Day21(input: List<String>) {
         depth: Int,
         keypad: Keypad = Keypad.Numeric,
     ): Long = shortestPathCache.getOrPut(code to depth) {
-        "A$code".zipWithNext().sumOf { transition ->
-            val shortestPath = transitionsCache.getOrPut(transition) {
-                keypad[transition.first, transition.second]
-            }
-
-            when (depth) {
-                0 -> shortestPath.length.toLong()
-                else -> findShortestPathCost(shortestPath, depth - 1, Keypad.Directional)
+        "${keypad.enterKey}$code".zipWithNext().sumOf { transition ->
+            keypad[transition.first, transition.second].minOf {
+                when (depth) {
+                    0 -> it.length.toLong()
+                    else -> findShortestPathCost(it, depth - 1, Keypad.Directional)
+                }
             }
         }
     }
 
     sealed class Keypad {
+        companion object {
+            private val transitionsCache = mutableMapOf<Pair<Char, Char>, List<String>>()
+        }
+
+        open val enterKey = 'A'
         protected abstract val keypad: Grid<Char>
 
-        operator fun get(from: Char, to: Char): String = buildString {
-            val fromNode = keypad[from]
-            val toNode = keypad[to]
-
-            val (rowDelta, colDelta) = toNode - fromNode
-            val horizontal: String = if (colDelta <= 0) {
-                "<".repeat(colDelta.absoluteValue)
-            } else {
-                ">".repeat(colDelta.absoluteValue)
-            }
-            val vertical: String = if (rowDelta <= 0) {
-                "^".repeat(rowDelta.absoluteValue)
-            } else {
-                "v".repeat(rowDelta.absoluteValue)
-            }
-
-            if (keypad[fromNode + Coordinate(rowDelta, 0)] == ' ') {
-                append(horizontal + vertical)
-            } else if (keypad[fromNode + Coordinate(0, colDelta)] == ' ') {
-                append(vertical + horizontal)
-            } else {
-                append(
-                    (horizontal + vertical).toList().sortedBy {
-                        "<v>^".indexOf(it)
-                    }.joinToString(separator = "")
+        operator fun get(start: Char, end: Char): List<String> {
+            return transitionsCache.getOrPut(start to end) {
+                buildPathsInDirection(
+                    current = keypad[start],
+                    delta = keypad[end] - keypad[start],
+                    transform = { it + enterKey }, // add 'A' to the end of each path.
                 )
             }
+        }
 
-            append('A')
+        private fun buildPathsInDirection(
+            current: IntCoordinate,
+            delta: IntCoordinate,
+            transform: (String) -> String,
+        ): List<String> {
+            when {
+                // can't navigate over the empty key space
+                keypad[current] == ' ' -> return emptyList()
+                // base case, nowhere to move, so no directions to add.
+                delta == Coordinate(0, 0) -> return listOf(transform(""))
+            }
+
+            val vertical = when {
+                delta.row < 0 -> buildPathsInDirection(
+                    current = current + Direction.North,
+                    delta = delta + Direction.South,
+                    transform = { "^$it" },
+                )
+
+                delta.row > 0 -> buildPathsInDirection(
+                    current = current + Direction.South,
+                    delta = delta + Direction.North,
+                    transform = { "v$it" },
+                )
+
+                else -> emptyList()
+            }
+
+
+            val horizontal = when {
+                (delta.col < 0) -> buildPathsInDirection(
+                    current = current + Direction.West,
+                    delta = delta + Direction.East,
+                    transform = { "<$it" },
+                )
+
+                (delta.col > 0) -> buildPathsInDirection(
+                    current = current + Direction.East,
+                    delta = delta + Direction.West,
+                    transform = { ">$it" },
+                )
+
+                else -> emptyList()
+            }
+
+            return (horizontal + vertical).map(transform).distinct()
         }
 
         data object Numeric : Keypad() {
@@ -97,8 +126,6 @@ class Day21(input: List<String>) {
                     " 0A",
                 ),
             )
-
-
         }
 
         data object Directional : Keypad() {
