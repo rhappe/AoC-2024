@@ -9,8 +9,46 @@ import utils.dijkstra
 import utils.printAnswer
 import kotlin.time.measureTimedValue
 
+private val fakeInput = """
+    ###############
+    #.......#....E#
+    #.#.###.#.###.#
+    #.....#.#...#.#
+    #.###.#####.#.#
+    #.#.#.......#.#
+    #.#.#####.###.#
+    #...........#.#
+    ###.#.#####.#.#
+    #...#.....#.#.#
+    #.#.#.###.#.#.#
+    #.....#...#.#.#
+    #.###.#.#.#.#.#
+    #S..#.....#...#
+    ###############
+""".trimIndent().split("\n")
+
+val fake2 = """
+    #################
+    #...#...#...#..E#
+    #.#.#.#.#.#.#.#.#
+    #.#.#.#...#...#.#
+    #.#.#.#.###.#.#.#
+    #...#.#.#.....#.#
+    #.#.#.#.#.#####.#
+    #.#...#.#.#.....#
+    #.#.#####.#.###.#
+    #.#.#.......#...#
+    #.#.###.#####.###
+    #.#.#...#.....#.#
+    #.#.#.#####.###.#
+    #.#.#.........#.#
+    #.#.#.#########.#
+    #S#.............#
+    #################
+""".trimIndent().split("\n")
+
 fun main() {
-    val input = readInput(day = 16)
+    val input = fake2//readInput(day = 16)
 
     val partOneAnswer = measureTimedValue { Day16.Part01.foo(input) }
     partOneAnswer.printAnswer(label = "Part 1")
@@ -23,15 +61,18 @@ private object Day16 {
     object Part01 {
         fun foo(input: List<String>): Int {
             val maze = parseMaze(input)
-            val endCandidates = maze.traverse().distances.filter { it.key.first == maze.end }
-            return endCandidates.minOf { it.value }
+            val endCandidates = maze.traverse().values.filter { it.key.first == maze.end }
+            return endCandidates.minOf { it.value.distance }
         }
     }
 
     object Part02 {
         fun foo(input: List<String>): Int {
             val maze = parseMaze(input)
-            val path = maze.traverse().getAllShortestPathsTo(maze.end to Direction.North) { item ->
+            val path = maze.traverse().getAllShortestPathsTo(
+                end = maze.end to Direction.North,
+                key = { it.first },
+            ) { item ->
                 Direction.entries.map { (item.first + it) to it }
                     .flatMap { adjacent ->
                         Direction.entries.filter { it != adjacent.second }.map { direction ->
@@ -39,7 +80,8 @@ private object Day16 {
                         }
                     }.toSet()
             }
-            return path.flatten().distinctBy { it.first }.count()
+            val minSize = path.minOf { it.size }
+            return path.filter { it.size == minSize }.flatten().distinctBy { it.first }.count()
         }
     }
 

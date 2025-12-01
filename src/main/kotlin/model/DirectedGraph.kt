@@ -10,7 +10,7 @@ data class DirectedGraph<T>(
     fun findShortestPath(start: T, end: T): List<Pair<T, Int>> {
         val result = dijkstra(start) ?: error("Could not complete distance calculation from $start.")
         val path = result.shortestPathTo(findNode(end)) ?: error("Could not find a path from $start to $end.")
-        return path.map { it.value to result.distances.getValue(it) }
+        return path.map { it.value to result.values.getValue(it).distance }
     }
 
     fun dijkstra(start: T): DijkstraResult<Node<T>>? {
