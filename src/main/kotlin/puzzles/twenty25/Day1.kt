@@ -14,7 +14,7 @@ fun main() {
     part1Answer.printAnswer(label = "Part 1")
 
     val part2Answer = measureTimedValue { Day1(input).part2.solve() }
-    part2Answer.printAnswer(label = "Part 1")
+    part2Answer.printAnswer(label = "Part 2")
 }
 
 private class Day1(input: List<String>) {
