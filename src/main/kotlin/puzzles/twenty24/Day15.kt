@@ -1,6 +1,7 @@
 package puzzles.twenty24
 
 import api.readInput
+import model.CardinalDirection
 import model.Coordinate
 import model.Direction
 import model.IntCoordinate
@@ -84,7 +85,7 @@ private object Day15 {
         )
     }
 
-    private fun parseMoves(input: List<String>): List<Direction> {
+    private fun parseMoves(input: List<String>): List<CardinalDirection.Primary> {
         val emptyIndex = input.indexOfFirst { it == "" }
         val moveItems = input.subList(emptyIndex + 1, input.size)
         return moveItems.joinToString(separator = "").mapNotNull {
@@ -116,10 +117,10 @@ private object Day15 {
             position = position + direction,
         )
 
-        fun getAdjacentPositions(direction: Direction): List<IntCoordinate> = when (direction) {
-            Direction.North, Direction.South -> coverage.map { it + direction }
-            Direction.East -> listOf(coverage.last() + direction)
-            Direction.West -> listOf(coverage.first() + direction)
+        fun getAdjacentPositions(direction: CardinalDirection.Primary): List<IntCoordinate> = when (direction) {
+            CardinalDirection.Primary.North, CardinalDirection.Primary.South -> coverage.map { it + direction }
+            CardinalDirection.Primary.East -> listOf(coverage.last() + direction)
+            CardinalDirection.Primary.West -> listOf(coverage.first() + direction)
         }
     }
 
@@ -137,7 +138,7 @@ private object Day15 {
     ) {
         private val entities = boxes + walls
 
-        fun moved(direction: Direction): Warehouse {
+        fun moved(direction: CardinalDirection.Primary): Warehouse {
             val movedRobot = robot.moved(direction)
             val nextEntity = entities.firstOrNull { movedRobot.position in it }
             if (nextEntity == null) {
@@ -158,24 +159,25 @@ private object Day15 {
             }
         }
 
-        private fun getMovableEntities(entity: WarehouseEntity, direction: Direction): List<WarehouseEntity> {
-            return when (entity.position) {
-                // if the current entity is a wall, it can't be moved, and we should not move it.
-                in walls -> emptyList()
-                // if the current entity is a box, we can move it, and we should try to find what else it'll push.
-                in boxes -> {
-                    val adjacentEntities = entity.getAdjacentPositions(direction).mapNotNull { position ->
-                        entities.firstOrNull { position in it }
-                    }
-
-                    adjacentEntities.flatMap { getMovableEntities(it, direction) } + entity
+        private fun getMovableEntities(
+            entity: WarehouseEntity,
+            direction: CardinalDirection.Primary,
+        ): List<WarehouseEntity> = when (entity.position) {
+            // if the current entity is a wall, it can't be moved, and we should not move it.
+            in walls -> emptyList()
+            // if the current entity is a box, we can move it, and we should try to find what else it'll push.
+            in boxes -> {
+                val adjacentEntities = entity.getAdjacentPositions(direction).mapNotNull { position ->
+                    entities.firstOrNull { position in it }
                 }
-                // otherwise, it's an empty space, which really shouldn't happen since the position we're checking
-                // is derived from a warehouse entity...
-                else -> error(
-                    "Could not find a warehouse entity at the specified position: ${entity.position}\n\n$this",
-                )
+
+                adjacentEntities.flatMap { getMovableEntities(it, direction) } + entity
             }
+            // otherwise, it's an empty space, which really shouldn't happen since the position we're checking
+            // is derived from a warehouse entity...
+            else -> error(
+                "Could not find a warehouse entity at the specified position: ${entity.position}\n\n$this",
+            )
         }
 
         override fun toString(): String = buildString {

@@ -2,10 +2,7 @@ package puzzles.twenty24
 
 import api.readInput
 import kotlinx.coroutines.*
-import model.Coordinate
-import model.Direction
-import model.Grid
-import model.IntCoordinate
+import model.*
 import utils.formatSeconds
 import utils.printAnswer
 import java.util.concurrent.atomic.AtomicInteger
@@ -125,22 +122,22 @@ private object Day06 {
     private const val OBSTACLE = '#'
 
     object FacingDirection {
-        private val Direction.character: Char
+        private val CardinalDirection.Primary.character: Char
             get() = when (this) {
-                Direction.North -> '^'
-                Direction.East -> '>'
-                Direction.South -> 'v'
-                Direction.West -> '<'
+                CardinalDirection.Primary.North -> '^'
+                CardinalDirection.Primary.East -> '>'
+                CardinalDirection.Primary.South -> 'v'
+                CardinalDirection.Primary.West -> '<'
             }
 
-        val characters = Direction.entries.map { it.character }.toSet()
+        val characters = Direction.cardinals.primaries.map { it.character }.toSet()
 
-        fun fromCharacter(character: Char) = Direction.entries.first { it.character == character }
+        fun fromCharacter(character: Char) = Direction.cardinals.primaries.first { it.character == character }
     }
 
     private data class Vector(val coordinate: IntCoordinate, val direction: Direction) {
         fun rotated(): Vector {
-            return copy(direction = direction.rotateClockwise())
+            return copy(direction = direction.rotate(clockwise = true))
         }
     }
 

@@ -20,12 +20,10 @@ sealed interface Coordinate<V : Number> {
     infix fun distanceTo(other: Coordinate<V>): V
 
     data class Integers(override val row: Int, override val col: Int) : Coordinate<Int> {
-        override fun plus(facingDirection: Direction): IntCoordinate = when (facingDirection) {
-            Direction.North -> copy(row = row - 1)
-            Direction.East -> copy(col = col + 1)
-            Direction.South -> copy(row = row + 1)
-            Direction.West -> copy(col = col - 1)
-        }
+        override fun plus(facingDirection: Direction): IntCoordinate = copy(
+            row = row + facingDirection.verticalDelta,
+            col = col + facingDirection.horizontalDelta,
+        )
 
         override operator fun minus(other: Coordinate<Int>): IntCoordinate {
             return Integers(
@@ -47,12 +45,10 @@ sealed interface Coordinate<V : Number> {
     }
 
     data class Longs(override val row: Long, override val col: Long) : Coordinate<Long> {
-        override fun plus(facingDirection: Direction): LongCoordinate = when (facingDirection) {
-            Direction.North -> copy(row = row - 1)
-            Direction.East -> copy(col = col + 1)
-            Direction.South -> copy(row = row + 1)
-            Direction.West -> copy(col = col - 1)
-        }
+        override fun plus(facingDirection: Direction): LongCoordinate = copy(
+            row = row + facingDirection.verticalDelta,
+            col = col + facingDirection.horizontalDelta,
+        )
 
         override operator fun minus(other: Coordinate<Long>): LongCoordinate {
             return Longs(

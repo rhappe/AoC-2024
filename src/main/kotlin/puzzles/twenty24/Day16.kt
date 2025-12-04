@@ -1,6 +1,5 @@
 package puzzles.twenty24
 
-import api.readInput
 import model.Coordinate
 import model.Direction
 import model.IntCoordinate
@@ -73,9 +72,9 @@ private object Day16 {
                 end = maze.end to Direction.North,
                 key = { it.first },
             ) { item ->
-                Direction.entries.map { (item.first + it) to it }
+                Direction.cardinals.primaries.map { (item.first + it) to it }
                     .flatMap { adjacent ->
-                        Direction.entries.filter { it != adjacent.second }.map { direction ->
+                        Direction.cardinals.primaries.filter { it != adjacent.second }.map { direction ->
                             adjacent.first to direction
                         }
                     }.toSet()
@@ -95,12 +94,12 @@ private object Day16 {
         val width = walls.maxOf { it.col }
 
         private val directionalPaths = paths.flatMap { path ->
-            Direction.entries.map { path to it }
+            Direction.cardinals.primaries.map { path to it }
         }
 
         fun traverse(): DijkstraResult<Pair<IntCoordinate, Direction>> {
             return dijkstra(directionalPaths, start to Direction.East) { (coordinate, direction) ->
-                Direction.entries.map { (coordinate + it) to it }
+                Direction.cardinals.primaries.map { (coordinate + it) to it }
                     .associateWith { if (it.second != direction) 1001 else 1 }
                     .toList()
                     .toSet()

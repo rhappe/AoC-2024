@@ -42,10 +42,8 @@ class Grid<T>(data: List<List<T>>) : List<List<T>> by data {
     inline fun <R> mapCoordinates(block: (IntCoordinate) -> R): List<R> {
         val grid = this
         return buildList {
-            for (row in grid.indices) {
-                for (col in grid[row].indices) {
-                    add(block(Coordinate(row, col)))
-                }
+            grid.forEachCoordinate { coordinate ->
+                add(block(coordinate))
             }
         }
     }
@@ -56,6 +54,17 @@ class Grid<T>(data: List<List<T>>) : List<List<T>> by data {
 
     inline fun <R> mapValuesIndexed(block: (IntCoordinate, T) -> R) = mapCoordinates {
         block(it, this[it])
+    }
+
+    inline fun filterCoordinates(predicate: (T) -> Boolean): List<IntCoordinate> {
+        val grid = this
+        return buildList {
+            grid.forEachIndexed { coordinate, value ->
+                if (predicate(value)) {
+                    add(coordinate)
+                }
+            }
+        }
     }
 }
 

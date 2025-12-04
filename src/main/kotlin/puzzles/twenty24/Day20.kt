@@ -67,7 +67,7 @@ object Day20 {
         private val shortestPath: List<Pair<IntCoordinate, Int>> by lazy {
             val graph = DirectedGraph(
                 values = paths,
-                neighborsBlock = { it inDirections Direction.entries },
+                neighborsBlock = { it inDirections Direction.cardinals.primaries },
             )
             // all nodes are distance 1 apart, so we can just use the index for distance
             graph.findShortestPath(start, end)

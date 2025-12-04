@@ -1,10 +1,7 @@
 package puzzles.twenty24
 
 import api.readInput
-import model.Coordinate
-import model.Direction
-import model.Grid
-import model.IntCoordinate
+import model.*
 import utils.mapValues
 import utils.runTimedMeasurement
 
@@ -107,15 +104,15 @@ private object Day12 {
          *   - 3 sides to the south, and
          *   - 1 side to the west
          */
-        private fun countSides(direction: Direction): Int {
+        private fun countSides(direction: CardinalDirection.Primary): Int {
             val plotsWithFence = plots.filter { direction in it.fences }
             val groups = when (direction) {
-                Direction.North, Direction.South -> plotsWithFence
+                CardinalDirection.Primary.North, CardinalDirection.Primary.South -> plotsWithFence
                     .groupBy { it.position.row }.values
                     .mapValues { it.position.col }
                     .map { it.sorted() }
 
-                Direction.East, Direction.West -> plotsWithFence
+                CardinalDirection.Primary.East, CardinalDirection.Primary.West -> plotsWithFence
                     .groupBy { it.position.col }.values
                     .mapValues { it.position.row }
                     .map { it.sorted() }
@@ -189,10 +186,10 @@ private object Day12 {
 
             val currentPlot = Plot(
                 position = position,
-                fences = Direction.entries.filter { position + it !in grid || grid[position + it] != type },
+                fences = Direction.cardinals.primaries.filter { position + it !in grid || grid[position + it] != type },
             )
 
-            val adjacent = Direction.entries
+            val adjacent = Direction.cardinals.primaries
                 .filter { it !in currentPlot.fences }
                 .flatMap { buildRegionPlots(type, position + it) }
 

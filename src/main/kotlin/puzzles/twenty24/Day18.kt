@@ -120,7 +120,7 @@ object Day18 {
         ): List<IntCoordinate>? {
             val paths = emptyData
             val result = utils.dijkstra(paths, start) { path ->
-                Direction.entries.map { (path + it) to 1 }.toSet()
+                Direction.cardinals.primaries.map { (path + it) to 1 }.toSet()
             }
             return result shortestPathTo end
         }
