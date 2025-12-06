@@ -1,7 +1,7 @@
 package aoc.twenty24
 
 import kotlin.test.Test
-import puzzles.twenty24.Day22.Secret
+import aoc.twenty24.Day22.Secret
 import kotlin.test.assertEquals
 
 
