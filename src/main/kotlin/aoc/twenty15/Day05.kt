@@ -9,14 +9,14 @@ import kotlin.time.measureTimedValue
 fun main() {
     val input = readInput(day = 5, year = 2015)
 
-    val partOneAnswer = measureTimedValue { Day5(input).part1.solve() }
+    val partOneAnswer = measureTimedValue { Day05(input).part1.solve() }
     partOneAnswer.printAnswer(label = "Part 1")
 
-    val partTwoAnswer = measureTimedValue { Day5(input).part2.solve() }
+    val partTwoAnswer = measureTimedValue { Day05(input).part2.solve() }
     partTwoAnswer.printAnswer(label = "Part 2")
 }
 
-class Day5(input: List<String>) {
+class Day05(input: List<String>) {
     val part1: Solution<Int> = Part1(input)
 
     private class Part1(private val input: List<String>) : Solution<Int> {

@@ -1,12 +1,10 @@
 package aoc.twenty15
 
 import aoc.api.readInput
-import model.Coordinate
 import model.Grid
 import model.IntCoordinate
 import solution.Solution
 import utils.printAnswer
-import kotlin.math.ceil
 import kotlin.math.max
 import kotlin.time.measureTimedValue
 

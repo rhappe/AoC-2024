@@ -8,14 +8,14 @@ import kotlin.time.measureTimedValue
 fun main() {
     val input = readInput(day = 7, year = 2015)
 
-    val partOneAnswer = measureTimedValue { Day7(input).part1.solve() }
+    val partOneAnswer = measureTimedValue { Day07(input).part1.solve() }
     partOneAnswer.printAnswer(label = "Part 1")
 
-    val partTwoAnswer = measureTimedValue { Day7(input).part2(partOneAnswer.value).solve() }
+    val partTwoAnswer = measureTimedValue { Day07(input).part2(partOneAnswer.value).solve() }
     partTwoAnswer.printAnswer(label = "Part 2")
 }
 
-class Day7(private val input: List<String>) {
+class Day07(private val input: List<String>) {
     val part1 = Solution {
         Circuit(input).calculateValue("a")
     }
