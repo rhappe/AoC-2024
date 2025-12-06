@@ -1,6 +1,6 @@
 package aoc.twenty15
 
-import api.readInput
+import aoc.api.readInput
 import model.Coordinate
 import model.IntCoordinate
 import solution.Solution

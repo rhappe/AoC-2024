@@ -1,6 +1,6 @@
 package aoc.twenty25
 
-import api.readInput
+import aoc.api.readInput
 import model.*
 import solution.Solution
 import utils.printAnswer

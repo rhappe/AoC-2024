@@ -1,6 +1,6 @@
 package aoc.twenty24
 
-import api.readInput
+import aoc.api.readInput
 import model.DirectedGraph
 import solution.Solution
 import utils.printAnswer

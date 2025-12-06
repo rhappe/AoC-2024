@@ -1,6 +1,6 @@
 package aoc.twenty24
 
-import api.readInput
+import aoc.api.readInput
 import kotlin.time.DurationUnit
 import kotlin.time.measureTimedValue
 

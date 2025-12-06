@@ -1,7 +1,7 @@
 package aoc.twenty24
 
-import api.API_LINE_ITEM_SEPARATOR
-import api.readInput
+import aoc.api.API_LINE_ITEM_SEPARATOR
+import aoc.api.readInput
 import kotlin.math.abs
 
 fun main() {

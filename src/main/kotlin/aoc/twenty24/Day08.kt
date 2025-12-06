@@ -1,6 +1,6 @@
 package aoc.twenty24
 
-import api.readInput
+import aoc.api.readInput
 import model.Coordinate
 import model.IntCoordinate
 import kotlin.time.DurationUnit

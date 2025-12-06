@@ -1,6 +1,6 @@
 package aoc.twenty24
 
-import api.readInput
+import aoc.api.readInput
 
 fun main() {
     val input = readInput(day = 5)

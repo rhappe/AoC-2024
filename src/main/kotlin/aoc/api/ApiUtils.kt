@@ -1,4 +1,4 @@
-package api
+package aoc.api
 
 import com.soberg.kotlin.aoc.api.AdventOfCodeInputApi
 import kotlin.io.path.Path

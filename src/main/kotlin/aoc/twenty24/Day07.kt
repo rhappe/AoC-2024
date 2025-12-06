@@ -1,6 +1,6 @@
 package aoc.twenty24
 
-import api.readInput
+import aoc.api.readInput
 import com.soberg.aoc.utlities.extensions.asyncSumOfBlocking
 import kotlinx.coroutines.runBlocking
 import utils.printAnswer
