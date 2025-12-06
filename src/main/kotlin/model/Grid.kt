@@ -82,6 +82,16 @@ class Grid<T>(data: List<List<T>>) : List<List<T>> by data {
     }
 }
 
+fun <T> Grid(rows: Int, cols: Int, init: (Int, Int) -> T): Grid<T> {
+    val data = List(rows) { row ->
+        List(cols) { col ->
+            init(row, col)
+        }
+    }
+
+    return Grid(data)
+}
+
 fun <T, R> Grid(data: List<List<T>>, transform: (IntCoordinate, T) -> R): Grid<R> = Grid(
     data = buildList {
         for (row in data.indices) {
