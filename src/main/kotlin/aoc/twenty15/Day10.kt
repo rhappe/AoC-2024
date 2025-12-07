@@ -22,7 +22,7 @@ class Day10(input: String) {
     val part1 = Solution { solve(input, depth = 40) }
     val part2 = Solution { solve(input, depth = 50) }
 
-    private fun solve(input: String, depth: Int) {
+    private fun solve(input: String, depth: Int): Int {
         var result = input
         repeat(depth) {
             val matches = digitCountRegex.findAll(result)
@@ -33,6 +33,6 @@ class Day10(input: String) {
                 acc + "$count$character"
             }
         }
-        result.length
+        return result.length
     }
 }
