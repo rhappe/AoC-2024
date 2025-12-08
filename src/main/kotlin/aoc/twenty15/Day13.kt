@@ -54,11 +54,10 @@ class Day13(input: List<String>) {
         val happiness: Int,
     ) {
         companion object {
-            private val seatingEffectRegex =
-                "^(.*) would (.*) (\\d*) happiness units by sitting next to (.*)\\.".toRegex()
+            private val effectRegex = "^(.*) would (.*) (\\d*) happiness units by sitting next to (.*)\\.".toRegex()
 
             fun parse(value: String): SeatingEffect {
-                return seatingEffectRegex.findAll(value).first().groups.filterNotNull().drop(1).let { groups ->
+                return effectRegex.findAll(value).first().groups.filterNotNull().drop(1).let { groups ->
                     SeatingEffect(
                         subject = groups[0].value,
                         neighbor = groups[3].value,
