@@ -1,6 +1,8 @@
 package model
 
 import kotlin.math.absoluteValue
+import kotlin.math.max
+import kotlin.math.min
 
 typealias IntCoordinate = Coordinate.Integers
 typealias LongCoordinate = Coordinate.Longs
@@ -84,3 +86,19 @@ fun Coordinate(row: Long, col: Long) = Coordinate.Longs(row, col)
 inline infix fun <V : Number, reified T : Coordinate<V>> T.inDirections(
     directions: Collection<Direction>
 ): Collection<T> = directions.map { (this + it) as T }
+
+infix fun IntCoordinate.lineTo(other: IntCoordinate): LineSegment {
+    return when {
+        row == other.row -> LineSegment.Horizontal(
+            row = row,
+            endCols = min(col, other.col) to max(col, other.col),
+        )
+
+        col == other.col -> LineSegment.Vertical(
+            col = col,
+            endRows = min(row, other.row) to max(row, other.row),
+        )
+
+        else -> LineSegment.Askew(this to other)
+    }
+}
