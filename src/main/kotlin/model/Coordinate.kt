@@ -91,12 +91,12 @@ infix fun IntCoordinate.lineTo(other: IntCoordinate): LineSegment {
     return when {
         row == other.row -> LineSegment.Horizontal(
             row = row,
-            endCols = min(col, other.col) to max(col, other.col),
+            endCols = col to other.col,
         )
 
         col == other.col -> LineSegment.Vertical(
             col = col,
-            endRows = min(row, other.row) to max(row, other.row),
+            endRows = row to other.row,
         )
 
         else -> LineSegment.Askew(this to other)

@@ -12,14 +12,15 @@ sealed interface LineSegment {
 
     data class Horizontal(
         val row: Int,
-        val endCols: Pair<Int, Int>,
+        val colsRange: IntRange,
     ) : Level {
-        internal val colsRange: IntRange by lazy {
-            min(endCols.first, endCols.second)..max(endCols.first, endCols.second)
-        }
+        constructor(row: Int, endCols: Pair<Int, Int>) : this(
+            row = row,
+            colsRange = min(endCols.first, endCols.second)..max(endCols.first, endCols.second),
+        )
 
         override val points: Pair<IntCoordinate, IntCoordinate> by lazy {
-            Coordinate(row, endCols.first) to Coordinate(row, endCols.second)
+            Coordinate(row, colsRange.first) to Coordinate(row, colsRange.last)
         }
 
         override infix fun intersects(other: Level): Boolean {
@@ -32,14 +33,15 @@ sealed interface LineSegment {
 
     data class Vertical(
         val col: Int,
-        val endRows: Pair<Int, Int>,
+        val rowsRange: IntRange,
     ) : Level {
-        internal val rowsRange: IntRange by lazy {
-            min(endRows.first, endRows.second)..max(endRows.first, endRows.second)
-        }
+        constructor(col: Int, endRows: Pair<Int, Int>) : this(
+            col = col,
+            rowsRange = min(endRows.first, endRows.second)..max(endRows.first, endRows.second),
+        )
 
         override val points: Pair<IntCoordinate, IntCoordinate> by lazy {
-            Coordinate(endRows.first, col) to Coordinate(endRows.second, col)
+            Coordinate(rowsRange.first, col) to Coordinate(rowsRange.last, col)
         }
 
         override infix fun intersects(other: Level): Boolean {

@@ -94,12 +94,12 @@ class Day9(input: List<String>) {
                 when (it) {
                     is LineSegment.Horizontal -> LineSegment.Horizontal(
                         row = it.row,
-                        endCols = (it.endCols.first + 1) to (it.endCols.second - 1),
+                        endCols = (it.colsRange.first + 1) to (it.colsRange.last - 1),
                     )
 
                     is LineSegment.Vertical -> LineSegment.Vertical(
                         col = it.col,
-                        endRows = (it.endRows.first + 1) to (it.endRows.second - 1),
+                        endRows = (it.rowsRange.first + 1) to (it.rowsRange.last - 1),
                     )
                 }
             }
